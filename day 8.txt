@@ -1,0 +1,695 @@
+Session 1 : 19th May 2019
+
+Ethans@03: Ethans@03
+Ethans@01: Ethans@01
+Classroom1: ethans@1
+Classroom2: ethans@2
+Classroom3: ethans@3
+
+jayeshdhale@gmail.com
+
+
+https://aws.amazon.com/free
+
+
+
+http://collabedit.com/n52jd
+
+--------------------------------
+Three service modesl in AWS
+IAAS
+PAAS
+SAAS
+All cloud solutions prodice these three services.
+
+
+Security	IAAS > PAAS > SAAS
+Customize	IAAS > PAAS
+Cost		IAAS cost will be less as compare to others.
+Administration	IAAS > PAAS > SAAS
+
+Being devops engineer, you shuold be able to decide which tool is suitable.
+
+Deployment modes
+
+Public cloud 			Privat model			Hybrid model				Multicloud
+------------			------------			------------				------------
+AWS, Azure, GCP			Openstack, VCloud		Comnination of more than		Using multiple public cloud		
+								one cloud i.e. on-premised+cloud	i.e. AWS+Azure+GCP etc..
+Third higher cost		Higher cost			Second higher				Mostly product base company will prefer to have this.
+User:30-40% companies		User: Banks, financial inst	User: Most of the companies
+Security: 3rd			Security: Highest 1st		Security: 2nd Higher
+
+--------------------------------------------------------------------------------------------------------------------------
+
+AWS IAM (Identity Access Management)
+|
+|
+|----Root---Owner---Manage------|---Permissions
+				|---Billing
+				|---Admin previliges
+				|---Can create accounts
+				|---Can create services
+
+There are two type of policies: AWS Managed policy & Customer managed policy
+
+Root----|---Devops Team---------IAM-devops1 (Here company will provide you account ID)----Need permission now i.e.policies (Devops Administration)
+	|		--------IAM-devops2	
+	|		--------IAM-devops3
+	|[Devops team usually get both access, programmatical & console access]
+	|
+	|
+	|
+	|
+	|---Developer Team---------Dev-user4 (Each one of dev has uniq secret key and access key) 
+	|		  ---------Dev-user5
+	|[Developer team usually get programatical access. On to permissions (Lambda,API) ]
+	|
+
+We have created two grops: 
+Devops		: Same permission given what the above user(iam-user1-devops) is having
+Developer	: Same permission given what the above user(dev-user1) is having
+
+But important note is: Apply permission on group level always. Not to give permission users level. Provide users level if you really need some specific permissions.
+
+
+User						Group	
+------------------------------------		----------------------------------------		
+A user can be part of group			Group can not be part of different group
+A user can be part of multiple group
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+25-05-2019 (Day 2)
+
+When we need to understand about customer managed plolicy, then we need to understand first below service.
+Customer managed policy - This means for more precise control. 
+
+
+1) Lmabda- Service related to development, we are going to assigne that level of services
+2) RDS-Relation Database Service
+3) EC2- Elastic Compute Cloud
+4) VPC:
+
+Note: All above policies are depend on the user needs.
+
+
+s3- Simple storage service:(PAAS (Platform As A Service))
+--------------------------
+Storage purpose: Sometimes we call it as Object Storage Services
+S3 can store object level data. Data is binary data only e.g. pdf,docs,image,videos,logs,source code.
+Now here object is just image. Now the quetion may come liek what would be the size of object?(0kb-5TB/object), How many objects we can store?(Unlimited objects)
+Now if you keep on storign millions of object, there may be a problem of seggregation. So in this case AWS provide you one option "Buckets:-Logical Unit". You can create bucket.Default limit is 100 bucket.And you can increase number to 200 only.
+
+Bucket1			bucket2		bucket3
+-------			-------		-------
+Save unlimited		Save unlimited	Save unlimited
+objects			objects		objects
+
+Now, if you create bucket applicaton wise, then there may be data saved for QA env, Dev evn & Prod env. Again there is mess. 
+If you create bucket on environment basis, i.e. one bucket for QA env, 2nd for Dev env, 3rd for prod env. This is something looks better than above.
+Here precise control comes into picture. You can provide specific permission to particular environment group.You can manage permission/plicy at bucket level or object level in the buckets.
+
+Within bucket you can created sub-folders.
+
+Interview question: May ask how many applicatons you have. Consider 10. Simply we can have 30 buckets for 3 different environment.Bucket is just pay as you go model.If you store data then you have to pay. If you do not store any data and you created bucket then you don't have to pay anything.
+
+
+-> Create bucket: While creating bucket usually each company have their it's own naming convention.
+Whle creating bucket, there is one option Region.There are different different region. So it is nothing but geographical location.Usually we select nearest location. You can edit region once you create bucket.
+We need to take care of three points while selecting region: High Avaialability, High Bandwidth, Low Latency
+
+AWS provide facility to upload your data across various region.
+
+Now go to bucket page and right click on it. Copy object URL(each object have it's own URL) and paste it on another tab: You will see there an error "Access denied".And this is due to permission limitation.
+
+Here is why: Bucket
+		|
+
+		|
+		|---object1
+		|---object2 etc
+
+S3 policies---Bucket level
+	   ---Object level
+
+
+so you need to have bucket level permissions. 
+Go to bucket page > Click on Permission > Click on Edit under Block Public Access section > Turn it OFF > Now click on object > Click on Permission > Select Everyone > Select Read Object > Save 
+
+Now try accessing URL, you should be able to access data which you had uploaded.
+
+Moving ahead, We have concept of versioning so here is versioning on aws s3 services. 
+Create one more bucket > provide different name > click on Next > Select check box "Keep all versions...."
+
+There is an account "Free-Tier-Limit" but here you can store objects of only 5GB.
+
+Assignment: Now your bucket is deleted from iam user because administrator access. Now remove access, again create bucket via devops user and give permissions and sign in by iam user and try to delete bucket.
+
+Interview question: 1. Whether action is by default allow or deny? Deny means restrict few people.
+		    2. Have you ever created plolicy?
+		    3. Which policy you have created? Ans- Yea, read policy
+		    4. Can you disable versioning? Ans- No.You can only suspend versioning. 
+Prefer to have one plicy for one service.
+
+
+Assignment: Create user let say Developer.
+
+Developer(user)--->cteate plolicy for dev user---| s3 -> write
+		    			   | API Gateway -> write
+		    			   | Lambda -> Write
+		    			   | RDS -> Read
+
+
+25-05-2019 (Day 3)
+
+Storage Classes (Storage type)
+
+1) Genral purpose storage (Standard storage): It is for data that is accessed very frequently. If offers high availability (that means your data is replicated on multiple devices internally), durability, provides very low latency High through put.
+
+Durability: 99.9
+9999999999 (More the durability, lesser the chances of data loss).  
+
+availability: 99.99
+Retrival time: if time is better then cost will be high
+
+2) Standard Infrequent Access (Standard IA): It is for data that is accessed very infrequently. If offers high availability (that means your data is replicated on multiple devices internally), durability, provides very high latency than standard storage, High through put.
+
+Durability: 99.99
+Avaialbility: 99.99
+Retrieval time: High as compared to standard storage.
+Ex.To store data like logs which older than 1 month.
+
+Ex. Dynamic websites, cloud bases applicatoin, big data (When there is high throughput, big data comes into picture), gaming etc.
+
+3) Glacier: For backup and archieve purpose
+
+Retrieval time: very high
+durability: 99.99
+availability: 99.99
+Ex: Logs (Older than 1 year imp data, complience data)
+
+4) Intelligent Tiering: AWS analyze the object access for 30 days. If data is being used within 30 days, then AWS store your data from Intellligent to Standard storage.If data is being used used oftenly the AWS will store your data from Interlligne tiering to Standard storage automatically.
+
+So now above all 4 option storing your data on multiple zones. That means your cost is still high. But if you have a data which is not important for you and you feel that is no longer in use further. Then why to store in multiple zones and why to pay high cost. IN this case you can use one below option "One-Zone Infrequent".
+
+5) One-Zone infrequent: Data which is being used very less oftenly.
+Availability: High
+Durability: Low
+Retireval time: High like in seconds
+Cost: Low
+Latency: Low
+
+
+Interview question: What is that service for backup and archieve? Which storage class is by default? Ans- Standard Storage.
+
+Retrieval types in terms of time:
+1) Data can be retrieved within 1-3 minutes
+2) Data can be retrieve within 1-3 hours
+3) Data can be retrieve within 5-6 days
+
+Life Cycles policy for s3: This is set of rules. We can move data from one storage to another storage class automatically.
+
+User data upload----->Standard storage--------->Infrequent Access-------->Glacier------------>Delete
+	   	      Bills(Min 30 days)	(Min 30 days)		  (Min 60 days)
+The above process is done automatically.
+
+Here you can create life cycle on bucket level and object level as well. Just give a try for creating life cycle.
+
+-------
+
+Next Topic: EC2 (Most of the activities is done on EC2 in real time)
+EC2 comes under IAAS
+In Interview perspective, you need remember type. 
+-> Now create instance and launch it. You instance can run for totak 750 hours. So once you are done with taks then used to stop it.
+-> Once you create instance then login using user name "ec2-user" via putty. 
+Fire following commands:
+-sudo yum update
+-sudo yum install httpd
+-sudo service httpd start
+-sudo service https status
+-cd /var/www
+-sudo vi index.html: Put sample code of html
+-Once done try accessing url: http://18.191.158.156:80/index.html
+
+SEcurity group: -We have seen this while creating instance. This is nothing but virtual firewall rules
+		-Contains inbound and outbound rules.
+		-There is NO Deny rule ( We can not block any network or any IP range). This means that, we can only allow.
+		-Can apply rules at ec2 level
+		-We can apply max 250 rules. Means 25 security group and each may contains 10 rules.
+
+Rule format: protocal - port - source.
+
+For next session: Be prepare with IP classes, IP range, diff between public IP and Private IP, what is subnet mask, What is subnet.
+
+------------
+
+Day (4) 1st-Jun-2019
+
+EC2 is region base service. So when you create key to access vm then, that key will be different for all region. 
+At one time, you can apply total 250 rules.
+
+Topic: ELB (Elastic Load Balancing) This is AWS service.
+	   -------------------------------------------------		
+
+User--------ELB---------|---EC2 Instance1 |
+			|		  |	
+			|---EC2 Instance2 | Load will be distributed accross all these instances distributed equally.
+			|		  |
+			|---EC2 Instance3 |
+
+For ELB, all instances should be from same region. But the zones you can have withing instance is from different region.
+Types of ELB: Aplicatoin Elastic load balance ( This works on OSI 7th Layer + It can handle HTTP&HTTPS request
+	      Classic Elastic load balance (People do not prefer to use it. This works at 7th Layer of OSI model. It can handle HTTP+HTTPS+TCP request. This is only suitable for old EC2)
+ 	      Network Elastic load balance (It can handle millions of request and works on OSI layer 3. It can handle TCP request.)
+
+You can not change load balance type once you configured. And this is you can use for multiple applications.
+
+IQ: What are the features of ELB? 
+There are two types of routing in ELB: 1) Path Based Routing & 2) Host Based Routing
+While creating ELB, you need to provide security group. So you need to first create security group of your own policy so that you can choose that security group. 
+
+Auto Scaling: It can create/delete EC2 instances automatically based on same policies.
+
+Policy-----|
+		   |
+		   |--Metrices-----|---CPU --------------------MEans we can set limit upto 70%. If total CPU utilization is more than 70% then autoscale will create EC2 instance automatically.
+						   |---Network In/Out
+Interview question: Based on what factors you define metrices. So that, is CPU, disk space, network In/Out
+
+
+Thre are two types of scaling
+-----------------------------
+1. Vertical scaling: Change EC2 configuraitons e.g. If you had t2.micro then you changed it to t2.medium OR from t2.medium to t2.large
+2. Horizontal scaling: Addoing EC2 or removing EC2 instances. But make sure you have same configuraitons on all instances while creation.
+
+But autoscale support only horizontal scaling.
+
+Topic VPC: virtual Private Network. Private network is public cloud.
+	  |
+	  |
+	  |
+	 OWN
+	  |
+	  |
+	 CIDR (Class less Inter Domain Routing)
+	  |
+	  |
+	Private IP 
+	
+Assignment: Try to create VPC. While creation of subnet, creat it like Subnet1: 10.0.1.0/24 (Frontend), Subnet2: 10.0.2.0/24 (Middleware), Subnet3: 10.0.3.0/24 (Backend)   
+
+How does it looks like
+
+VPC on 10.0.0.0/16
+------------------------------------------------------------
+Frontend		10.0.1.0/24			Used for web app
+------------------------------------------------------------
+Middleware		10.0.2.0/24			Used for internal app
+------------------------------------------------------------
+Backed			10.0.3.0/24			User for database etc..
+--------------------------------------------------------------------------------------------------------------------------------------
+
+Day (5): 2nd-Jun-2019
+
+Auto Scaling: Information is mentioned in the previous class
+By default all the subnets are private subnet.
+
+Q1: How can we convert private subnets into public?
+Ans: Internet Gateway.That means you need to create Internet gateway (Chargable) > Attache to VPC > Create route tables > subnet association > Then your subnet (Frontend subnet)
+
+
+Q2: How can we download updates from internet without providing internet connectivity?
+Ans: Natting (Nate gateway or NAT Instance). But the problems are, this instance can be stop, needs frequent updates, you need to manage this manually. But in autoscaling, all these things will be handled automatically.
+
+Elastic IP is nothing but Static IP. 
+If you select default VPC then only you need user Natting concept. Becuase it come up with NATTING only. When you create your own VPN and if you want to convert private IP to public IP then you need to create NATTING.
+
+Now start LAB with Autoscaling.
+*******************************
+-> Created Application load balancer.
+
+							copy during EC2 instance provision
+Template(service1) ----------------------------------------------------------My bucket s3(Data,app,scripts etc..)(service2)
+To copy data, you need IAM Role having permissions at EC2 level, S3 level and modify specific rights.
+
+   User
+	|
+	|
+	|
+|------------|
+|Autoscaling |
+|------------|
+
+IAM role: IAM role is a IAM identity service, contains sets of rules through which can access AWS services. IAM role is similatr to IAM user but IAM role 
+can't login to console. 
+OR 
+In other words, one AWS services can call different AWS services on behalf of you.
+
+First, create IAM role > select policy (S3fullaccess) > Next > END
+Second, Create bucket > disable block public IP
+Third, Upload file
+Four, configure auto scaling
+
+Interview Q: Do we have memory option in metric type on Create auto scaling group? Ans: No
+
+--------------------------------------------------------------------------------------------------------------------------------------
+
+Day (5): 8nd-Jun-2019
+
+GIT Topic (1st component of Devops cycle)
+Interview Q: How can you move/migrate data from SCM to some other repository i.e. GIT? 
+
+1) First create new instance with no rules in security group (apply as per your need)
+2) Once instance created, login to the VM of that particular instance
+3) Install GIT now : [root@ip-172-31-15-7 ec2-user]# history
+    1  yum install git
+    2  git --version
+    3  history
+[root@ip-172-31-15-7 ec2-user]#
+4) Create directory: /home/ec2-user/localrepo
+5) Type "git init" to initialize git. That means, you will started to get each copy of version.
+6) Create sample file e.g. index1.html and feed contents like "This is file index1.html" and save it.
+7) Enter "git status" Status: Untracked files:
+8) Enter "git add index1.html"
+9) Again "git status" Status: Changes to be committed:
+10) Enter "git commit -m "index1.html commiting" to commit
+11) Again "git status" Status: nothing to commit, working tree clean
+12) Now to check commit iD: "git log"
+commit 034c7b9d478106a21f0a4eb18e6d728f7b6aedbf (HEAD -> master)
+Author: root <root@ip-172-31-15-7.us-east-2.compute.internal>
+Date:   Sat Jun 8 06:48:02 2019 +0000
+
+    index1.html commiting
+13) [root@ip-172-31-15-7 localrepo]# git branch
+* master
+14) Now in step #12, you don't know who commited code, as in the logs it is showing root. So config with your email or name
+[root@ip-172-31-15-7 localrepo]# git config --global user.email gaurav.devops123@gmail.com
+[root@ip-172-31-15-7 localrepo]# git config --global user.name gaurav
+[root@ip-172-31-15-7 localrepo]#
+15) Now change in index1.html 
+16) Type "git status"
+On branch master
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   index1.html
+
+no changes added to commit (use "git add" and/or "git commit -a")
+17) [root@ip-172-31-15-7 localrepo]# git add index1.html
+[root@ip-172-31-15-7 localrepo]#
+18)Commit changes:
+[root@ip-172-31-15-7 localrepo]# git commit -m "First commit after changed to index1.html"
+On branch master
+Changes not staged for commit:
+        modified:   index1.html
+
+no changes added to commit
+19)[root@ip-172-31-15-7 localrepo]# git status
+On branch master
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+        modified:   index1.html
+
+[root@ip-172-31-15-7 localrepo]#
+20) [root@ip-172-31-15-7 localrepo]# git log -1 (This is to reduce id number)
+commit f87398ab6e4b0e31cba7b7e4d796aacb3b6aa556 (HEAD -> master)
+Author: gaurav <gaurav.devops123@gmail.com>
+Date:   Sat Jun 8 07:13:30 2019 +0000
+
+    index1.html commiting with changes
+[root@ip-172-31-15-7 localrepo]#
+21) [root@ip-172-31-15-7 localrepo]# git log --oneline 
+f87398a (HEAD -> master) index1.html commiting with changes
+034c7b9 index1.html commiting
+[root@ip-172-31-15-7 localrepo]#
+
+22) [root@ip-172-31-15-7 localrepo]# git show 034c7b9
+commit 034c7b9d478106a21f0a4eb18e6d728f7b6aedbf
+Author: root <root@ip-172-31-15-7.us-east-2.compute.internal>
+Date:   Sat Jun 8 06:48:02 2019 +0000
+
+    index1.html commiting
+
+diff --git a/index1.html b/index1.html
+new file mode 100644
+index 0000000..3d9184d
+--- /dev/null
++++ b/index1.html
+@@ -0,0 +1 @@
++This is file index1.html
+
+23) [root@ip-172-31-15-7 localrepo]# git show 034c7b9
+commit 034c7b9d478106a21f0a4eb18e6d728f7b6aedbf
+Author: root <root@ip-172-31-15-7.us-east-2.compute.internal>
+Date:   Sat Jun 8 06:48:02 2019 +0000
+
+    index1.html commiting
+
+diff --git a/index1.html b/index1.html
+new file mode 100644
+index 0000000..3d9184d
+--- /dev/null
++++ b/index1.html
+@@ -0,0 +1 @@
++This is file index1.html
+
+24) If you want to show all commit id 
+[root@ip-172-31-15-7 localrepo]# git log
+commit f87398ab6e4b0e31cba7b7e4d796aacb3b6aa556 (HEAD -> master)
+Author: gaurav <gaurav.devops123@gmail.com>
+Date:   Sat Jun 8 07:13:30 2019 +0000
+
+    index1.html commiting with changes
+
+commit 034c7b9d478106a21f0a4eb18e6d728f7b6aedbf
+Author: root <root@ip-172-31-15-7.us-east-2.compute.internal>
+Date:   Sat Jun 8 06:48:02 2019 +0000
+
+    index1.html commiting
+[root@ip-172-31-15-7 localrepo]# git log --oneline
+f87398a (HEAD -> master) index1.html commiting with changes
+034c7b9 index1.html commiting
+
+25) Let's create branch
+[root@ip-172-31-15-7 localrepo]# git checkout -b b1
+Switched to a new branch 'b1'
+[root@ip-172-31-15-7 localrepo]#
+
+26) [root@ip-172-31-15-7 localrepo]# git branch
+* b1
+  master
+[root@ip-172-31-15-7 localrepo]#
+It is showing * with b1 that means you are in b1 branch
+
+27) Create file two files > add > commit
+28) Now do ls and you should see total 2 files 
+index1.html index2.html
+29) Now switch to master branche from b1 branch 
+[root@ip-172-31-15-7 localrepo]# git checkout master
+Switched to branch 'master'
+30) [root@ip-172-31-15-7 localrepo]# ls
+index1.html
+You should see only one file
+
+31) To create conflict perform following steps:
+-----------------------
+[root@ip-172-31-15-7 localrepo]# vi index5.html
+[root@ip-172-31-15-7 localrepo]# gid add index5.html
+bash: gid: command not found
+[root@ip-172-31-15-7 localrepo]#
+[root@ip-172-31-15-7 localrepo]# git add index5.html
+[root@ip-172-31-15-7 localrepo]# git commit -m "index5.html commited"
+[master 57fdbd4] index5.html commited
+ 1 file changed, 1 insertion(+)
+ create mode 100644 index5.html
+[root@ip-172-31-15-7 localrepo]#
+[root@ip-172-31-15-7 localrepo]#
+[root@ip-172-31-15-7 localrepo]# git status
+On branch master
+nothing to commit, working tree clean
+[root@ip-172-31-15-7 localrepo]# git checkout b1
+Switched to branch 'b1'
+[root@ip-172-31-15-7 localrepo]# ls
+index1.html  index3.html
+[root@ip-172-31-15-7 localrepo]# vi index5.html
+[root@ip-172-31-15-7 localrepo]#
+[root@ip-172-31-15-7 localrepo]#
+[root@ip-172-31-15-7 localrepo]# git add index5.html
+[root@ip-172-31-15-7 localrepo]# git commit -m "index5.html commited on b1"
+[b1 95975e5] index5.html commited on b1
+ 1 file changed, 1 insertion(+)
+ create mode 100644 index5.html
+[root@ip-172-31-15-7 localrepo]#
+[root@ip-172-31-15-7 localrepo]#
+[root@ip-172-31-15-7 localrepo]# git checkout master
+Switched to branch 'master'
+[root@ip-172-31-15-7 localrepo]#
+[root@ip-172-31-15-7 localrepo]# ls
+index1.html  index2.html  index3.html  index5.html
+[root@ip-172-31-15-7 localrepo]# git merge b1
+Auto-merging index5.html
+CONFLICT (add/add): Merge conflict in index5.html
+Automatic merge failed; fix conflicts and then commit the result.
+[root@ip-172-31-15-7 localrepo]#
+[root@ip-172-31-15-7 localrepo]#
+[root@ip-172-31-15-7 localrepo]#
+[root@ip-172-31-15-7 localrepo]# git checkout master
+index5.html: needs merge
+error: you need to resolve your current index first
+[root@ip-172-31-15-7 localrepo]# git stash
+index5.html: needs merge
+index5.html: needs merge
+index5.html: unmerged (b9a45e198fd83117382a0eb657b34373c09dba98)
+index5.html: unmerged (68576e6cdc520910b9581bb291b2ca25e435bf1d)
+fatal: git-write-tree: error building trees
+Cannot save the current index state
+[root@ip-172-31-15-7 localrepo]#
+
+32) So vi index5.html > remove unwanted contents and again add > commit
+33) Now we have to push files from master branch to repostiroy created on github.com
+34) https://github.com > sign in > you should see + symbol > create new repository > provide meaningful name > submit
+35) You should see few commands on the next page once you submit
+36) Go to the instance > Switch the branch to master
+37) You need to do one time activity, add github repository url "git remote add origin https://github.com/gauravatgit123/DevopsRepo.git"
+38) 
+
+
+
+ 
+
+
+------------------------------------------------
+Day (7): 15th June 2019
+
+Commands for last assignment:
+1) git remote -v (To check where your repo is pointing)
+2) git branch -b devops
+3) git branch -b devops-testin
+4) git add & commit5) git checkout devops
+5) vi setting.vxml
+6) git checkout devops
+7) git merge devops-testing
+
+Today's task: Git reset
+
+1) remote -v
+[root@ip-172-31-15-7 localrepo]# git remote -v
+origin  https://github.com/gauravatgit123/DevopsRepo.git (fetch)
+origin  https://github.com/gauravatgit123/DevopsRepo.git (push)
+
+2) Create blank repo with name "newRepo15062019" on github (https://github.com/gauravatgit123/newRepo15062019.git)
+3) Just try again changing file in existing and add, commit & push. Let's check your changes commit to previous repo not new one (blank)
+4) Now to set URL to commit changes in new repo: 'git remote set-url origin <above url>'
+5) Now check 'git remote -v'
+[root@ip-172-31-15-7 localrepo]# git remote -v
+origin  https://github.com/gauravatgit123/newRepo15062019.git (fetch)
+origin  https://github.com/gauravatgit123/newRepo15062019.git (push)
+
+6) Do now 'git push'. So your all stuff should go to new repo i.e. newRepo15062019
+
+7) If you set to url which is invalid and repo is not there on remote the your command will work but when you do push at that time it will say:
+root@ip-172-31-15-7 localrepo]# git remote set-url origin https://github.com/gauravatgit123/newRep123dsfs.git
+[root@ip-172-31-15-7 localrepo]#
+[root@ip-172-31-15-7 localrepo]#
+[root@ip-172-31-15-7 localrepo]#
+[root@ip-172-31-15-7 localrepo]# git remote -v
+origin  https://github.com/gauravatgit123/newRep123dsfs.git (fetch)
+origin  https://github.com/gauravatgit123/newRep123dsfs.git (push)
+[root@ip-172-31-15-7 localrepo]#
+[root@ip-172-31-15-7 localrepo]#
+[root@ip-172-31-15-7 localrepo]# git push
+Username for 'https://github.com': gaurav.dp1@gmail.com
+Password for 'https://gaurav.dp1@gmail.com@github.com':
+remote: Repository not found.
+fatal: repository 'https://github.com/gauravatgit123/newRep123dsfs.git/' not found
+
+
+8) If you set both your branch to both repo
+git remote set-url origin https://github.com/gauravatgit123/DevopsRepo.git
+git remote set-url origin1 https://github.com/gauravatgit123/newRepo15062019.git
+
+[root@ip-172-31-15-7 localrepo]# git remote -v
+origin  https://github.com/gauravatgit123/DevopsRepo.git (fetch)
+origin  https://github.com/gauravatgit123/DevopsRepo.git (push)
+origin1 https://github.com/gauravatgit123/newRepo15062019.git (fetch)
+origin1 https://github.com/gauravatgit123/newRepo15062019.git (push)
+
+9) Now if do 'git push' then changes will go the the 1st repo in the list.
+10) So to push changes in rest do 'git push origin1'
+
+11) If you want to remote remote repo alias, in case you set to multiple repo which you do not need
+->let's check first 'git remote'
+[root@ip-172-31-15-7 localrepo]# git remote
+origin
+origin1
+
+->Now remove 'git remote remove origin1'
+[root@ip-172-31-15-7 localrepo]# git remote
+origin
+
+12) Git Reset: Used to clean working area. User to point to any specific commit directly. Revert does the same one by one. So if you have 1000 commits and you want to go 500 commites back,
+			   in this case 'reset' will work.
+
+Reset with three options:
+1) Hard: 'git reset --hard <commit id>' - This will remove your all commit id after the commit id which you have mentioned in the command + It will clean all files & folders.
+(uncommited + unstage + delete)
+
+2) Mix: File will not be deleted, it just move from staging/index to working
+(uncommited + unstage) ----> Default
+
+3) Soft: no delete + working area will be there (uncommited) --> We don't orefer soft, thought there is no use case of soft.
+------------------------------
+
+How to reproduce HARD scenario:
+1) [root@ip-172-31-15-7 localrepo]#
+[root@ip-172-31-15-7 localrepo]#vi file2.txt
+
+2) [root@ip-172-31-15-7 localrepo]# git add file2.txt
+[root@ip-172-31-15-7 localrepo]#
+
+3) [root@ip-172-31-15-7 localrepo]# git status
+On branch master
+Your branch and 'origin/master' have diverged,
+and have 3 and 17 different commits each, respectively.
+  (use "git pull" to merge the remote branch into yours)
+
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+        new file:   file2.txt
+
+[root@ip-172-31-15-7 localrepo]#
+
+4) [root@ip-172-31-15-7 localrepo]# git reset --hard	(If you want work with commit id then add <commit id>)
+HEAD is now at 930a9b2 trial
+[root@ip-172-31-15-7 localrepo]# ls
+file1.txt  index1.html  index2.html  index3.html  index5.html  test.txt
+[root@ip-172-31-15-7 localrepo]#
+
+here you can, file2.txt which was you created is deleted now after 'git reset --hard'
+
+How to reproduce MIXED scenario:
+
+1) 
+			   
+How to reproduce stash scenarios
+
+1) stash pop etc...
+
+
+How to reproduce Rebase
+Rebase: Similar to merge. when your project is linear or you are working on (standalone project). 
+
+
+
+
+
+
+
+
+

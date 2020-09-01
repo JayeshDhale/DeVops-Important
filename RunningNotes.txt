@@ -1,0 +1,743 @@
+Session 1 : 19th May 2019
+
+Ethans@03: Ethans@03
+Ethans@01: Ethans@01
+Classroom1: ethans@1
+Classroom2: ethans@2
+Classroom3: ethans@3
+
+jayeshdhale@gmail.com
+
+
+https://aws.amazon.com/free
+
+
+
+http://collabedit.com/n52jd
+
+--------------------------------
+Three service modesl in AWS
+IAAS
+PAAS
+SAAS
+All cloud solutions prodice these three services.
+
+
+Security	IAAS > PAAS > SAAS
+Customize	IAAS > PAAS
+Cost		IAAS cost will be less as compare to others.
+Administration	IAAS > PAAS > SAAS
+
+Being devops engineer, you shuold be able to decide which tool is suitable.
+
+Deployment modes
+
+Public cloud 			Privat model			Hybrid model				Multicloud
+------------			------------			------------				------------
+AWS, Azure, GCP			Openstack, VCloud		Comnination of more than		Using multiple public cloud		
+								one cloud i.e. on-premised+cloud	i.e. AWS+Azure+GCP etc..
+Third higher cost		Higher cost			Second higher				Mostly product base company will prefer to have this.
+User:30-40% companies		User: Banks, financial inst	User: Most of the companies
+Security: 3rd			Security: Highest 1st		Security: 2nd Higher
+
+--------------------------------------------------------------------------------------------------------------------------
+
+AWS IAM (Identity Access Management)
+|
+|
+|----Root---Owner---Manage------|---Permissions
+				|---Billing
+				|---Admin previliges
+				|---Can create accounts
+				|---Can create services
+
+There are two type of policies: AWS Managed policy & Customer managed policy
+
+Root----|---Devops Team---------IAM-devops1 (Here company will provide you account ID)----Need permission now i.e.policies (Devops Administration)
+	|		--------IAM-devops2	
+	|		--------IAM-devops3
+	|[Devops team usually get both access, programmatical & console access]
+	|
+	|
+	|
+	|
+	|---Developer Team---------Dev-user4 (Each one of dev has uniq secret key and access key) 
+	|		  ---------Dev-user5
+	|[Developer team usually get programatical access. On to permissions (Lambda,API) ]
+	|
+
+We have created two grops: 
+Devops		: Same permission given what the above user(iam-user1-devops) is having
+Developer	: Same permission given what the above user(dev-user1) is having
+
+But important note is: Apply permission on group level always. Not to give permission users level. Provide users level if you really need some specific permissions.
+
+
+User						Group	
+------------------------------------		----------------------------------------		
+A user can be part of group			Group can not be part of different group
+A user can be part of multiple group
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+25-05-2019 (Day 2)
+
+When we need to understand about customer managed plolicy, then we need to understand first below service.
+Customer managed policy - This means for more precise control. 
+
+
+1) Lmabda- Service related to development, we are going to assigne that level of services
+2) RDS-Relation Database Service
+3) EC2- Elastic Compute Cloud
+4) VPC:
+
+Note: All above policies are depend on the user needs.
+
+
+s3- Simple storage service:(PAAS (Platform As A Service))
+--------------------------
+Storage purpose: Sometimes we call it as Object Storage Services
+S3 can store object level data. Data is binary data only e.g. pdf,docs,image,videos,logs,source code.
+Now here object is just image. Now the quetion may come liek what would be the size of object?(0kb-5TB/object), How many objects we can store?(Unlimited objects)
+Now if you keep on storign millions of object, there may be a problem of seggregation. So in this case AWS provide you one option "Buckets:-Logical Unit". You can create bucket.Default limit is 100 bucket.And you can increase number to 200 only.
+
+Bucket1			bucket2		bucket3
+-------			-------		-------
+Save unlimited		Save unlimited	Save unlimited
+objects			objects		objects
+
+Now, if you create bucket applicaton wise, then there may be data saved for QA env, Dev evn & Prod env. Again there is mess. 
+If you create bucket on environment basis, i.e. one bucket for QA env, 2nd for Dev env, 3rd for prod env. This is something looks better than above.
+Here precise control comes into picture. You can provide specific permission to particular environment group.You can manage permission/plicy at bucket level or object level in the buckets.
+
+Within bucket you can created sub-folders.
+
+Interview question: May ask how many applicatons you have. Consider 10. Simply we can have 30 buckets for 3 different environment.Bucket is just pay as you go model.If you store data then you have to pay. If you do not store any data and you created bucket then you don't have to pay anything.
+
+
+-> Create bucket: While creating bucket usually each company have their it's own naming convention.
+Whle creating bucket, there is one option Region.There are different different region. So it is nothing but geographical location.Usually we select nearest location. You can edit region once you create bucket.
+We need to take care of three points while selecting region: High Avaialability, High Bandwidth, Low Latency
+
+AWS provide facility to upload your data across various region.
+
+Now go to bucket page and right click on it. Copy object URL(each object have it's own URL) and paste it on another tab: You will see there an error "Access denied".And this is due to permission limitation.
+
+Here is why: Bucket
+		|
+
+		|
+		|---object1
+		|---object2 etc
+
+S3 policies---Bucket level
+	   ---Object level
+
+
+so you need to have bucket level permissions. 
+Go to bucket page > Click on Permission > Click on Edit under Block Public Access section > Turn it OFF > Now click on object > Click on Permission > Select Everyone > Select Read Object > Save 
+
+Now try accessing URL, you should be able to access data which you had uploaded.
+
+Moving ahead, We have concept of versioning so here is versioning on aws s3 services. 
+Create one more bucket > provide different name > click on Next > Select check box "Keep all versions...."
+
+There is an account "Free-Tier-Limit" but here you can store objects of only 5GB.
+
+Assignment: Now your bucket is deleted from iam user because administrator access. Now remove access, again create bucket via devops user and give permissions and sign in by iam user and try to delete bucket.
+
+Interview question: 1. Whether action is by default allow or deny? Deny means restrict few people.
+		    2. Have you ever created plolicy?
+		    3. Which policy you have created? Ans- Yea, read policy
+		    4. Can you disable versioning? Ans- No.You can only suspend versioning. 
+Prefer to have one plicy for one service.
+
+
+Assignment: Create user let say Developer.
+
+Developer(user)--->cteate plolicy for dev user---| s3 -> write
+		    			   | API Gateway -> write
+		    			   | Lambda -> Write
+		    			   | RDS -> Read
+
+
+25-05-2019 (Day 3)
+
+Storage Classes (Storage type)
+
+1) Genral purpose storage (Standard storage): It is for data that is accessed very frequently. It offers high availability (that means your data is replicated on multiple devices internally), durability, provides very low latency High through put.
+
+Durability: 99.9
+9999999999 (More the durability, lesser the chances of data loss).  
+
+availability: 99.99
+Retrival time: if time is better then cost will be high
+
+2) Standard Infrequent Access (Standard IA): It is for data that is accessed very infrequently. If offers high availability (that means your data is replicated on multiple devices internally), durability, provides very high latency than standard storage, 
+High through put.
+
+Durability: 99.99
+Avaialbility: 99.99
+Retrieval time: High as compared to standard storage.
+Ex.To store data like logs which older than 1 month.
+
+Ex. Dynamic websites, cloud bases applicatoin, big data (When there is high throughput, big data comes into picture), gaming etc.
+
+3) Glacier: For backup and archieve purpose
+
+Retrieval time: very high
+durability: 99.99
+availability: 99.99
+Ex: Logs (Older than 1 year imp data, complience data)
+
+4) Intelligent Tiering: AWS analyze the object access for 30 days. If data is being used within 30 days, then AWS store your data from Intellligent to Standard storage.If data is being used oftenly the AWS will store your data from 
+Interlligne tiering to Standard storage automatically.
+
+So now above all 4 option storing your data on multiple zones. That means your cost is still high. But if you have a data which is not important for you and you feel that is no longer in use further. Then why to store in multiple 
+zones and why to pay high cost. IN this case you can use one below option "One-Zone Infrequent".
+
+5) One-Zone infrequent: Data which is being used very less oftenly.
+Availability: High
+Durability: Low
+Retireval time: High like in seconds
+Cost: Low
+Latency: Low
+
+Interview question: What is that service for backup and archieve? Which storage class is by default? Ans- Standard Storage.
+
+Retrieval types in terms of time:
+1) Data can be retrieved within 1-3 minutes
+2) Data can be retrieve within 1-3 hours
+3) Data can be retrieve within 5-6 days
+
+Life Cycles policy for s3: This is set of rules. We can move data from one storage to another storage class automatically.
+
+User data upload----->Standard storage--------->Infrequent Access-------->Glacier------------>Delete
+	   	      Bills(Min 30 days)	(Min 30 days)		  (Min 60 days)
+The above process is done automatically.
+
+Here you can create life cycle on bucket level and object level as well. Just give a try for creating life cycle.
+
+-------
+
+Next Topic: EC2 (Most of the activities is done on EC2 in real time)
+EC2 comes under IAAS
+In Interview perspective, you need remember type. 
+-> Now create instance and launch it. Your instance can run for totak 750 hours. So once you are done with taks then used to stop it.
+-> Once you create instance then login using user name "ec2-user" via putty. 
+
+Fire following commands:
+-sudo yum update
+-sudo yum install httpd
+-sudo service httpd start
+-sudo service https status
+-cd /var/www
+-sudo vi index.html: Put sample code of html
+-Once done try accessing url: http://18.191.158.156:80/index.html
+
+
+SEcurity group: -We have seen this while creating instance. This is nothing but virtual firewall rules
+		-Contains inbound and outbound rules.
+		-There is NO Deny rule ( We can not block any network or any IP range). This means that, we can only allow.
+		-Can apply rules at ec2 level
+		-We can apply max 250 rules. Means 25 security group and each may contains 10 rules.
+
+Rule format: protocal - port - source.
+
+For next session: Be prepare with IP classes, IP range, diff between public IP and Private IP, what is subnet mask, What is subnet.
+============================================ Notes
+Refrence
+http://www.smartpctricks.com/2013/03/ip-address-classes-and-ranges-explained-with-subnet-mask.html
+https://www.computernetworkingnotes.com/networking-tutorials/ip-address-classes-and-definition-explained.html
+
+IP address classes
+Class	1st Octet Decimal Range	Default Subnet Mask
+A	1 – 126*			255.0.0.0
+B	128 – 191			255.255.0.0
+C	192 – 223			255.255.255.0
+D	224 – 239			Reserved for Multicasting
+E	240--254 			Reserved for reasearch and experiments
+
+Class	1st Octet Decimal Range	1st Octet High Order Bits	Network/Host ID (N=Network, H=Host)		Default Subnet Mask	Number of Networks	Hosts per Network (Usable Addresses)
+A	1 – 126*				0		N.H.H.H					255.0.0.0			126 (27 – 2)		16,777,214 (224 – 2)
+B	128 – 191				10		N.N.H.H					255.255.0.0		16,382 (214 – 2)		65,534 (216 – 2)
+C	192 – 223				110		N.N.N.H					255.255.255.0		2,097,150 (221 – 2)		254 (28 – 2)
+D	224 – 239				1110					Reserved for Multicasting
+E	240 – 254				1111					Experimental; used for research
+Note: Class A addresses 127.0.0.0 to 127.255.255.255 cannot be used and is reserved for loopback and diagnostic functions.
+
+Private IP Addresses
+Class	Private Networks		Subnet Mask	Address Range
+A	10.0.0.0			255.0.0.0		10.0.0.0 - 10.255.255.255
+B	172.16.0.0 - 172.31.0.0	255.240.0.0	172.16.0.0 - 172.31.255.255
+C	192.168.0.0		255.255.0.0	192.168.0.0 - 192.168.255.255
+
+-------------
+Private IP addresses
+Private IP addresses are the IP addresses which are reserved for local networks and cannot be accessed from a public network such as Internet. Vice versa a public network cannot be accessed from a private IP address.
+
+Following IP ranges are reserved for private IP addresses.
+
+10.0.0.0 to 10.255.255.255
+172.16.0.0 to 172.31.255.255
+192.168.0.0 to 192.168.255.255
+Public IP addresses
+Public IP addresses are the IP addresses which are publicly accessible from any public network such as Internet. In order to access a public IP address, we must have to use a public IP address.
+
+Except private IP addresses, all IP addresses of class A, B and C are public IP addresses.
+
+Special IP addresses
+Special IP addresses are the IP addresses which are reserved for network testing and troubleshooting. These IP addresses cannot be assigned to an end device or an interface. Following addresses are reserved for special purpose: -
+
+0.0.0.0:- This is the first IP address of IP addresses. It represents all networks.
+
+127.0.0.0 to 127.255.255.255: - Reserved for IP protocol testing and troubleshooting. Virtual interfaces such as loopback adaptor use this IP range for addressing.
+
+224.0.0.0 to 239.255.255.255 (Class D): - Reserved for multicast addresses. A multicast address is an address which has multiple recipients.
+
+240.0.0.0 to 255.255.255.255 (Class E): - Reserved for future use. These addresses are not used currently for any purpose.
+
+255.255.255.255:- This is the last IP address of IP addresses. It represents all hosts.
+
+That’s all for this tutorial. If you have any comment, suggestion or feedback about this tutorial, please mail me. If you like this tutorial, please don’t forget to share it with your friends through your favorite social platform.
+
+-----------------
+Subnet Mask
+Subnet mask is used to separate the network address from the host address in IP address. As we discussed earlier an IP address is the combination of network address and host address, subnet mask helps us and programs which use IP address in identifying the network portion and the host portion.
+
+Just like IP address, subnet mask is also 32 bits in length and uses same notations which IP address uses to present itself.
+
+Subnet mask assigns an individual bit for each bit of IP address. If IP bit belongs to network portion, assigned subnet mask bit will be turned on. If IP bit belongs to host portion, assigned subnet mask bit will be turned off.
+
+In binary notation, 1 (one) represents a turned on bit while 0 (zero) represents a turned off bit. In dotted-decimal notation, a value range 1 to 255 represents a turned on bit while a value 0 (zero) represents a turned off bit.
+
+======================================
+
+http://3.19.32.63:80/index.html
+http://18.191.39.9/index.html
+
+DNS Name:- ethans-demo-96538484.us-east-2.elb.amazonaws.com
+
+mv index2.html index.html
+
+===========================day 5
+autosacalingexampleday5
+
+aws s3 cp s3://autosacalingexampleday5 /var/www/html/ --recursive
+
+#!/bin/bash
+yum install httpd -y
+yum update -y
+aws s3 cp s3://autosacalingexampleday5 /var/www/html/ --recursive
+service httpd start
+chkconfig httpd on
+
+============================= day 6
+-> Once you create instance then login using user name "ec2-user" via putty. 
+
+Fire following commands:
+-sudo yum update
+-yum install git
+
+------------------------- day 7
+https://github.com/JayeshDhale/DevOps-May.git
+
+
+login as: ec2-user
+Authenticating with public key "imported-openssh-key"
+Last login: Sat Jun  8 05:44:45 2019 from 111.125.228.246
+
+       __|  __|_  )
+       _|  (     /   Amazon Linux 2 AMI
+      ___|\___|___|
+
+https://aws.amazon.com/amazon-linux-2/
+[ec2-user@ip-172-31-40-212 ~]$ sudo su
+[root@ip-172-31-40-212 ec2-user]# ls
+git-lab
+[root@ip-172-31-40-212 ec2-user]# cd git-lab
+[root@ip-172-31-40-212 git-lab]# ls
+index1.html  index2.html  index3.html  index4.html
+[root@ip-172-31-40-212 git-lab]# git branch
+  b1
+* master
+[root@ip-172-31-40-212 git-lab]# vi index7.html
+[root@ip-172-31-40-212 git-lab]# cat index7.html
+<h1>Created index7.html on EC2 instance </h1>
+[root@ip-172-31-40-212 git-lab]# git add index7.html
+[root@ip-172-31-40-212 git-lab]# git commit -m "Added index7.html on EC2"
+[master 5f05b7a] Added index7.html on EC2
+ 1 file changed, 1 insertion(+)
+ create mode 100644 index7.html
+[root@ip-172-31-40-212 git-lab]# git status
+On branch master
+nothing to commit, working tree clean
+[root@ip-172-31-40-212 git-lab]# git push origin1 master
+Username for 'https://github.com': JayeshDhale
+Password for 'https://JayeshDhale@github.com':
+Counting objects: 3, done.
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (3/3), 322 bytes | 322.00 KiB/s, done.
+Total 3 (delta 1), reused 0 (delta 0)
+remote: Resolving deltas: 100% (1/1), completed with 1 local object.
+To https://github.com/JayeshDhale/DevOps-May.git
+   7babd66..5f05b7a  master -> master
+[root@ip-172-31-40-212 git-lab]# ls
+index1.html  index2.html  index3.html  index4.html  index7.html
+[root@ip-172-31-40-212 git-lab]# git ls-files
+index1.html
+index2.html
+index3.html
+index4.html
+index7.html
+[root@ip-172-31-40-212 git-lab]# vi index.html
+[root@ip-172-31-40-212 git-lab]# vi index7.html
+[root@ip-172-31-40-212 git-lab]# git add index7.html
+[root@ip-172-31-40-212 git-lab]# git commit -m "modified again"
+[master 8afa386] modified again
+ 1 file changed, 1 insertion(+)
+[root@ip-172-31-40-212 git-lab]# git push origin1 master
+Username for 'https://github.com': JayeshDhale
+Password for 'https://JayeshDhale@github.com':
+To https://github.com/JayeshDhale/DevOps-May.git
+ ! [rejected]        master -> master (fetch first)
+error: failed to push some refs to 'https://github.com/JayeshDhale/DevOps-May.git'
+hint: Updates were rejected because the remote contains work that you do
+hint: not have locally. This is usually caused by another repository pushing
+hint: to the same ref. You may want to first integrate the remote changes
+hint: (e.g., 'git pull ...') before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+[root@ip-172-31-40-212 git-lab]# git push origin1 master
+Username for 'https://github.com': JayeshDhale
+Password for 'https://JayeshDhale@github.com':
+To https://github.com/JayeshDhale/DevOps-May.git
+ ! [rejected]        master -> master (fetch first)
+error: failed to push some refs to 'https://github.com/JayeshDhale/DevOps-May.git'
+hint: Updates were rejected because the remote contains work that you do
+hint: not have locally. This is usually caused by another repository pushing
+hint: to the same ref. You may want to first integrate the remote changes
+hint: (e.g., 'git pull ...') before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+[root@ip-172-31-40-212 git-lab]# git pull
+Username for 'https://github.com': JayeshDhale
+Password for 'https://JayeshDhale@github.com':
+remote: Repository not found.
+fatal: repository 'https://github.com/JayeshDhale/DevOps-May.gitgit/' not found
+[root@ip-172-31-40-212 git-lab]# git pull
+Username for 'https://github.com': ^C
+[root@ip-172-31-40-212 git-lab]# git remote -v
+origin  https://github.com/JayeshDhale/DevOps-May.gitgit (fetch)
+origin  https://github.com/JayeshDhale/DevOps-May.gitgit (push)
+origin1 https://github.com/JayeshDhale/DevOps-May.git (fetch)
+origin1 https://github.com/JayeshDhale/DevOps-May.git (push)
+[root@ip-172-31-40-212 git-lab]# git pull
+Username for 'https://github.com': JayeshDhale
+Password for 'https://JayeshDhale@github.com':
+remote: Repository not found.
+fatal: repository 'https://github.com/JayeshDhale/DevOps-May.gitgit/' not found
+[root@ip-172-31-40-212 git-lab]# git remote add origin3 https://github.com/JayeshDhale/DevOps-May.git
+[root@ip-172-31-40-212 git-lab]# git pull origin3
+remote: Enumerating objects: 5, done.
+remote: Counting objects: 100% (5/5), done.
+remote: Compressing objects: 100% (3/3), done.
+remote: Total 3 (delta 1), reused 0 (delta 0), pack-reused 0
+Unpacking objects: 100% (3/3), done.
+From https://github.com/JayeshDhale/DevOps-May
+ * [new branch]      master     -> origin3/master
+You asked to pull from the remote 'origin3', but did not specify
+a branch. Because this is not the default configured remote
+for your current branch, you must specify a branch on the command line.
+[root@ip-172-31-40-212 git-lab]# vi index7.html
+[root@ip-172-31-40-212 git-lab]# git commit -a -m "Modified index7.html"
+[master 20757ab] Modified index7.html
+ 1 file changed, 1 insertion(+)
+[root@ip-172-31-40-212 git-lab]# git status
+On branch master
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+        index.html
+
+nothing added to commit but untracked files present (use "git add" to track)
+[root@ip-172-31-40-212 git-lab]# rm index.html
+rm: remove regular file ‘index.html’? y
+[root@ip-172-31-40-212 git-lab]# git commit
+On branch master
+nothing to commit, working tree clean
+[root@ip-172-31-40-212 git-lab]# git ls-files
+index1.html
+index2.html
+index3.html
+index4.html
+index7.html
+[root@ip-172-31-40-212 git-lab]# git push origin3 master
+Username for 'https://github.com': JayeshDhale
+Password for 'https://JayeshDhale@github.com':
+To https://github.com/JayeshDhale/DevOps-May.git
+ ! [rejected]        master -> master (non-fast-forward)
+error: failed to push some refs to 'https://github.com/JayeshDhale/DevOps-May.git'
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. Integrate the remote changes (e.g.
+hint: 'git pull ...') before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+[root@ip-172-31-40-212 git-lab]# cat index7.html
+<h1>Created index7.html on EC2 instance </h1>
+<h1> asasasasas </h1>
+<h1> asaswqqwqelhkljklj sddfs</h1>
+[root@ip-172-31-40-212 git-lab]# git pull
+Username for 'https://github.com': JayeshDhale
+Password for 'https://JayeshDhale@github.com':
+remote: Repository not found.
+fatal: repository 'https://github.com/JayeshDhale/DevOps-May.gitgit/' not found
+[root@ip-172-31-40-212 git-lab]# git pull origin3
+You asked to pull from the remote 'origin3', but did not specify
+a branch. Because this is not the default configured remote
+for your current branch, you must specify a branch on the command line.
+[root@ip-172-31-40-212 git-lab]# ls
+index1.html  index2.html  index3.html  index4.html  index7.html
+[root@ip-172-31-40-212 git-lab]# git remote -v
+origin  https://github.com/JayeshDhale/DevOps-May.gitgit (fetch)
+origin  https://github.com/JayeshDhale/DevOps-May.gitgit (push)
+origin1 https://github.com/JayeshDhale/DevOps-May.git (fetch)
+origin1 https://github.com/JayeshDhale/DevOps-May.git (push)
+origin3 https://github.com/JayeshDhale/DevOps-May.git (fetch)
+origin3 https://github.com/JayeshDhale/DevOps-May.git (push)
+[root@ip-172-31-40-212 git-lab]# git remove origin
+git: 'remove' is not a git command. See 'git --help'.
+
+The most similar command is
+        remote
+[root@ip-172-31-40-212 git-lab]# git rm origin
+fatal: pathspec 'origin' did not match any files
+[root@ip-172-31-40-212 git-lab]# ls
+index1.html  index2.html  index3.html  index4.html  index7.html
+[root@ip-172-31-40-212 git-lab]# git remove -v
+git: 'remove' is not a git command. See 'git --help'.
+
+The most similar command is
+        remote
+[root@ip-172-31-40-212 git-lab]# git remote -v
+origin  https://github.com/JayeshDhale/DevOps-May.gitgit (fetch)
+origin  https://github.com/JayeshDhale/DevOps-May.gitgit (push)
+origin1 https://github.com/JayeshDhale/DevOps-May.git (fetch)
+origin1 https://github.com/JayeshDhale/DevOps-May.git (push)
+origin3 https://github.com/JayeshDhale/DevOps-May.git (fetch)
+origin3 https://github.com/JayeshDhale/DevOps-May.git (push)
+[root@ip-172-31-40-212 git-lab]# git pull origin3 master
+From https://github.com/JayeshDhale/DevOps-May
+ * branch            master     -> FETCH_HEAD
+Auto-merging index7.html
+CONFLICT (content): Merge conflict in index7.html
+Automatic merge failed; fix conflicts and then commit the result.
+[root@ip-172-31-40-212 git-lab]# vi index7.html
+[root@ip-172-31-40-212 git-lab]#
+[root@ip-172-31-40-212 git-lab]#
+[root@ip-172-31-40-212 git-lab]#
+[root@ip-172-31-40-212 git-lab]# git add .
+[root@ip-172-31-40-212 git-lab]# git commit -m "conflic"
+[master 79fceb9] conflic
+[root@ip-172-31-40-212 git-lab]# ls
+index1.html  index2.html  index3.html  index4.html  index7.html
+[root@ip-172-31-40-212 git-lab]# git pull origin3
+You asked to pull from the remote 'origin3', but did not specify
+a branch. Because this is not the default configured remote
+for your current branch, you must specify a branch on the command line.
+[root@ip-172-31-40-212 git-lab]# git push origin3 master
+Username for 'https://github.com': JayeshDhale
+Password for 'https://JayeshDhale@github.com':
+Counting objects: 9, done.
+Compressing objects: 100% (9/9), done.
+Writing objects: 100% (9/9), 825 bytes | 825.00 KiB/s, done.
+Total 9 (delta 5), reused 0 (delta 0)
+remote: Resolving deltas: 100% (5/5), completed with 1 local object.
+To https://github.com/JayeshDhale/DevOps-May.git
+   bd47c78..79fceb9  master -> master
+[root@ip-172-31-40-212 git-lab]# history
+    1  yum install git
+    2  git version
+    3  yum update
+    4  git  --version
+    5  clear
+    6  git --version
+    7  history
+    8  mkdir git-lab
+    9  cd git-lab
+   10  pwd
+   11  git init
+   12  ll -al
+   13  vi index1.html
+   14  ls
+   15  git status
+   16  git add
+   17  git add
+   18  git add .
+   19  git status
+   20  git commit -m "first commit"
+   21  git status
+   22  ls
+   23  git ls
+   24  git ls-files
+   25  ls
+   26  git log
+   27  git branch
+   28  git config --global user.email jayeshdhale@gmail.com
+   29  git config --global user.name jayeshd
+   30  history
+   31  vi index1.html
+   32  ls
+   33  git commit -a -m "index1.html modified"
+   34  git log
+   35  git status
+   36  vi index2.html
+   37  ls
+   38  git status
+   39  git add index2.html
+   40  git commit -m "added index2.html"
+   41  git status
+   42  git ls-files
+   43  git log --oneline'
+   44  git log --oneline
+   45  clear
+   46  '
+   47  git log --oneline
+   48  git show eed5cc2
+   49  git checkout -b b1
+   50  git branch
+   51  ls
+   52  git log
+   53  vi index3.html
+   54  git add index3.html
+   55  git commit -m "added index3.html on branch b1"
+   56  git status
+   57  git ls-files
+   58  git checkout master
+   59  ls
+   60  git checkout b1
+   61  git branch
+   62  vi index4.html
+   63  git checkout master
+   64  vi index4.html
+   65  git checkout b1
+   66  git branch
+   67  git add index4.html
+   68  git commit -m "added index4.html on branch b1"
+   69  git status
+   70  git ls-files
+   71  git checkout master
+   72  git branch
+   73  vi index4.html
+   74  git add index4.html
+   75  git commit -m "added index4.html on branch master"
+   76  git status
+   77  git ls-files
+   78  git checkout master
+   79  git branch
+   80  git merge b1
+   81  vi index4.html
+   82  git commit -a -m "mergerd file index4.html into master"
+   83  ls
+   84  cat index4.html
+   85  git status
+   86  git ls-files
+   87  git branch
+   88  git remote add origin https://github.com/JayeshDhale/DevOps-May.gitgit
+   89  git push -u origin master
+   90  git remote add origin https://github.com/JayeshDhale/DevOps-May.git
+   91  git push -u origin master
+   92  git push -u origin master
+   93  git remote add origin1 https://github.com/JayeshDhale/DevOps-May.git
+   94  git push origin1 master
+   95  exit
+   96  ls
+   97  cd git-lab
+   98  ls
+   99  git branch
+  100  vi index7.html
+  101  cat index7.html
+  102  git add index7.html
+  103  git commit -m "Added index7.html on EC2"
+  104  git status
+  105  git push origin1 master
+  106  ls
+  107  git ls-files
+  108  vi index.html
+  109  vi index7.html
+  110  git add index7.html
+  111  git commit -m "modified again"
+  112  git push origin1 master
+  113  git push origin1 master
+  114  git pull
+  115  git pull
+  116  git remote -v
+  117  git pull
+  118  git remote add origin3 https://github.com/JayeshDhale/DevOps-May.git
+  119  git pull origin3
+  120  vi index7.html
+  121  git commit -a -m "Modified index7.html"
+  122  git status
+  123  rm index.html
+  124  git commit
+  125  git ls-files
+  126  git push origin3 master
+  127  cat index7.html
+  128  git pull
+  129  git pull origin3
+  130  ls
+  131  git remote -v
+  132  git remove origin
+  133  git rm origin
+  134  ls
+  135  git remove -v
+  136  git remote -v
+  137  git pull origin3 master
+  138  vi index7.html
+  139  git add .
+  140  git commit -m "conflic"
+  141  ls
+  142  git pull origin3
+  143  git push origin3 master
+  144  history
+[root@ip-172-31-40-212 git-lab]# origin3
+
+
+==================
+git hub
+https://github.com/JayeshDhale/DevOpsgit.git
+
+bitbucket
+https://JayeshDhale@bitbucket.org/JayeshDhale/bitbucketassignment.git
+
+sudo su
+git remote remove origin
+git remote remove bitbucket-origin
+git remote -v
+
+git remote set-url origin https://github.com/JayeshDhale/DevOpsgit.git
+
+git remote add origin https://github.com/JayeshDhale/DevOpsgit.git
+
+git remote add origin https://JayeshDhale@bitbucket.org/JayeshDhale/demo.git
+
+543  mkdir bit-lab
+  544  git remote set-url origin https://JayeshDhale@bitbucket.org/JayeshDhale/demo.git
+  545  git remote -v
+  546  cd bit-lab
+  547  git remote -v
+  548  git init
+  549  git remote -v
+  550  git remote add origin https://JayeshDhale@bitbucket.org/JayeshDhale/demo.git
+  551  git remote -v
+  552  git pull origin master
+  553  ls
+  554  vi index.txt
+  555  cat index.txt
+  556  git add index.txt
+  557  git commit index.txt
+  558  git status
+  559  git commit -m "added"
+  560  git status
+  561  git push origin master
+  562  history
+

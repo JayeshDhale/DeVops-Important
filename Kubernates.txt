@@ -1,0 +1,211 @@
+============================Below commands run on Master
+   63  kubectl run --image=nginx
+   64  kubectl run --image=nginx deployment
+   65  kubectl get pods
+   66  kubectl get pods -o wide
+   67  kubectl get deployments
+   68  docker ps
+   69  docker inspect b130b8d51817
+   70  clear
+   71  kubectl get pods -o wide
+   81  kubectl expose pod  deployment-66f64f9db9-6tw7f --port=80 --target-port=81 --type=NodePort
+   82  kubectl get svc
+   83  kubectl delete svc deployment-66f64f9db9-6tw7f
+   84  kubectl expose pod  deployment-66f64f9db9-6tw7f --port=80 --target-port=80 --type=NodePort
+   85  kubectl get svc
+   86  history
+
+=====================================================
+
+Below commands ran on Node(Slave)
+   1  apt-get update && apt-get install -y apt-transport-https
+    2  curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+    3  cat <<EOF>/etc/apt/sources.list.d/kubernetes.list
+    4  deb http://apt.kubernetes.io/ kubernetes-xenial main
+    5  EOF
+    6  cat <<EOF>/etc/apt/sources.list.d/kubernetes.list
+    7  deb http://apt.kubernetes.io/ kubernetes-xenial main
+    8  EOF
+    9  cat <<EOF>/etc/apt/sources.list.d/kubernetes.list
+   10  deb http://apt.kubernetes.io/ kubernetes-xenial main
+   11  EOF
+   12  cat <<EOF>/etc/apt/sources.list.d/kubernetes.list
+   13  deb http://apt.kubernetes.io/ kubernetes-xenial main
+   14  EOF
+   15  cat <<EOF>/etc/apt/sources.list.d/kubernetes.list
+   16  cat /etc/apt/sources.list.d/kubernetes.list
+   17  apt-get update
+   18  apt-get install -y docker.io
+   19  apt-get install -y kubelet kubeadm kubectl kubernetes-cni
+   20  kubeadm join 172.31.28.243:6443 --token ori2mv.cmwr47jze68zxcsl     --discovery-token-ca-cert-hash sha256:5f66a751e199de1c0dd24540a938a3c3dba24bd0c25d116a21c0bfe3804a02e3
+   21  kubectl get pods
+   22  kubectl label nodes ip-172-31-40-180 node-role.kubernetes.io/node3=ip-172-31-40-180
+   23  history
+
+=====================Day 24 ----11 Aug
+kubectl expose pod  myjenkins-6756544b8c-wd9p2 --port=8080 --target-port=8080 --type=NodePort
+
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2019-08-11T05:50:09Z"
+  generateName: myjenkins-6756544b8c-
+  labels:
+    pod-template-hash: 6756544b8c
+    run: myjenkins
+  name: myjenkins-6756544b8c-wd9p2
+  namespace: default
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ReplicaSet
+    name: myjenkins-6756544b8c
+    uid: 1619af5a-cc9c-4107-93ff-fb07fc54b6f0
+  resourceVersion: "17747"
+  selfLink: /api/v1/namespaces/default/pods/myjenkins-6756544b8c-wd9p2
+  uid: d8ac8465-7dd0-4477-b37e-59728ef0af2b
+spec:
+  containers:
+  - image: jenkins
+    imagePullPolicy: Always
+    name: myjenkins
+===================================
+
+apiVersion: v1
+kind: Pod
+metadata:
+ name: mytomcat
+spec:
+  containers:
+  - image: tomcat
+    name: mytomcat
+    ports:
+    - containerPort: 8080
+============================
+apiVersion: v1
+kind: Pod
+metadata:
+ name: mynginix
+spec:
+  containers:
+  - image: nginix
+    name: mynginix
+    ports:
+    - containerPort: 8080
+============================(below is not working because kind deployment will need more parameters like selectors)
+apiVersion: v1
+kind: Deployment
+metadata:
+ name: mytomcatDeployment
+spec:
+  containers:
+  - image: tomcat
+    name: mytomcatDeployment
+    ports:
+    - containerPort: 8080
+
+=========================(kind: Deployment
+)
+apiVersion: apps/v1
+
+kind: Deployment
+
+metadata:
+  
+ name: nginx-deployment
+  
+ labels:
+ 
+   app: nginx
+
+spec:
+ 
+ selector:
+    
+   matchLabels:
+      
+     app: nginx
+ replicas: 2 
+  
+ template:
+    
+    metadata:
+      
+           labels:
+        
+             app: nginx
+    
+    spec:
+ 
+      containers:
+      
+      -  name: nginx
+        
+         image: nginx:1.7.9
+        
+         ports:
+        
+         - containerPort: 80
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
