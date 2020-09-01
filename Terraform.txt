@@ -1,0 +1,366 @@
+git hub repo -- https://github.com/JayeshDhale?tab=repositories
+
+-----------------------------------terraform infrastructure as a code (IaC)
+Its a open source tool, by which we can automate the provisioning of resources in cloud
+
+Benifits of Infrastrucutre as a code
+1)Cost reduction -->reduced labor cost
+2)Speed of execution -->its faster to provision infra programmatically
+3)Reduced Risk --> minimizes errors and security violations
+terraform supports HCL(Hashi Corp Lang) and JSON
+Cloudformation supports:JSON and YAML
+
+terraform --version ---->latest version of Terraform (0.12.26)
+terraform plan --->to check its behaviour use plan
+
+provider "aws" {
+  access_key = "ACCESS_KEY_HERE"
+  secret_key = "SECRET_KEY_HERE"
+  region     = "us-east-1"
+}
+
+resource "aws_instance" "example" {
+  ami           = "ami-2757f631"
+  instance_type = "t2.micro"
+}
+
+terraform init  ---> first always initialize terraform
+terraform apply --auto-approve
+terraform destroy --auto-approve ---> to delete the deployments or provision made
+
+===================== to launch windows ec2 instance -allow_rdp
+provider "aws" {
+  access_key = "ACCESS_KEY_HERE"
+  secret_key = "SECRET_KEY_HERE"
+  region     = "us-east-1"
+}
+
+resource "aws_instance" "example" {
+  ami           = "ami-066663db63b3aa675"
+  instance_type = "t2.micro"
+  key_name = "terraform-key"
+  security_groups = ["${aws_security_group.allow_rdp.name}"]
+
+}
+
+resource "aws_security_group" "allow_rdp" {
+  name        = "allow_rdp"
+  description = "Allow rdp traffic"
+
+  ingress {
+
+    from_port   = 3389 #  By default, the windows server listens on TCP port 3389 for RDP
+    to_port     = 3389
+    protocol =   "tcp"
+
+    cidr_blocks =  ["0.0.0.0/0"]
+  }
+}
+==========================Terraform Remote State on Amazon S3
+When you enter terraform apply command in a directory, terraform saves the state of the resources changed in a file called the 
+state file that is named terraform.tfstate in your working directory.
+This file is how terraform knows what to change, or destroy when you use terraform apply or destroy after creating a stack of resources.
+This state is stored by default in a local file named "terraform.tfstate", but it can also be stored remotely, 
+which works better in a team environment.
+
+Remote state is a feature of backends
+terraform {
+  backend "s3" {
+    bucket = "cloudyeti-terraform"
+    key    = "terraform.tfstate"
+    region = "us-east-1"
+  }
+}
+
+Terraform Remote State Locking by using DynamoDB
+1.create dynamoDB database
+2.create dynamoDB table say "terraformtable" use Primary Key value "LockID" & create table
+3.terraform {
+  backend "s3" {
+    bucket = "cloudyeti-terraform"
+    key    = "terraform.tfstate"
+    region = "us-east-1"
+    dynamodb_table = "terraformtable"
+  }
+}
+
+Now when you apply it creates entry in dynamodb table,which creates a lock on state file.
+Once current users operation is finished, then only it will be available for other user to use.
+
+======================Multiple terraform configuration (.tf) files=================
+provider.tf ,ec2.tf and security.tf
+when you apply terrform apply command it look for all .tf files in alphabetical order
+
+====================Terraform Variables | Launch Amazon EC2 using variables=======
+variable "ec2-key" {} # this is how you declare a variable.
+
+variable "ami" {default='ami-0080e4c5bc078760e'} # You can have default values for variables
+
+resource "aws_instance" "web-server" {
+  ami = "${var.ami}"
+  instance_type = "t2.micro"
+  key_name = "${var.ec2-key}"
+  vpc_security_group_ids = ["${aws_security_group.allow_ssh.id}"]
+
+  tags {
+    Name = "terraform-web-server"
+  }
+}
+
+resource "aws_security_group" "allow_ssh" {
+  name        = "allow_ssh"
+  description = "Allow ssh traffic"
+
+  ingress {
+    from_port   = 22 #
+    to_port     = 22
+    protocol =   "tcp"
+
+    cidr_blocks =  ["0.0.0.0/0"]
+  }
+}
+
+There are multiple ways to pass in variables when running the terraform apply command. In the order of preference
+
+1.as a command line flag
+$ terraform apply -var 'key-name=my-key'
+
+2.A seperate variable file which you reference like this while running the script.
+terraform apply  -var-file="vars.tfvars"
+
+For all files which match terraform.tfvars or *.auto.tfvars present in the current directory, Terraform automatically loads them to 
+populate variables. If the file is named something else, you can use the -var-file flag directly to specify a file. These files are 
+the same syntax as Terraform configuration files.
+
+3.Environment variables: Terraform will read environment variables in the form of TF_VAR_name to find the value for a variable. 
+For example, the TF_VAR_access_key variable can be set to set the access_key variable.
+
+4.If none of the first 3 steps are used to set variables, you are asked for variables when you run terraform apply.
+
+$ terraform apply
+var.ec2-key
+  Enter a value:
+
+5.Default variable values. You could set a default value when declaring the variable.
+variable "ec2-key" { default = "my-key"}
+============================
+Terraform Map And Lookup function
+Maps are a collection of string keys and string values. These can be useful for selecting values based on predefined parameters such as 
+the server configuration by the monthly price.
+
+lookup(map,Key,[default])
+
+Example 1
+===============================
+Maps are a way to create variables that are lookup tables. An example will show this best. Let's extract our AMIs into a map and add 
+support for the us-west-2 region as well:
+
+variable "amis" {
+  type = "map"
+  default = {
+    "us-east-1" = "ami-b374d5a5"
+    "us-west-2" = "ami-4b32be2b"
+  }
+}
+
+A variable can have a map type assigned explicitly, or it can be implicitly declared as a map by specifying a default value that is a map. 
+The above demonstrates both.
+
+Then, replace the aws_instance with the following:
+resource "aws_instance" "example" {
+  ami           = var.amis[var.region]
+  instance_type = "t2.micro"
+}
+
+Example 2
+===============================
+variable "plans" {
+    type = "map"
+    default = {
+        "5USD"  = "1xCPU-1GB"
+        "10USD" = "1xCPU-2GB"
+        "20USD" = "2xCPU-4GB"
+    }
+}
+plan = "${var.plans["5USD"]}"
+
+The values matching to their keys can also be used to look up information in other maps. 
+For example, underneath is a short list of plans and their corresponding storage sizes.
+
+variable "storage_sizes" {
+    type = "map"
+    default = {
+        "1xCPU-1GB"  = "25"
+        "1xCPU-2GB"  = "50"
+        "2xCPU-4GB"  = "80"
+    }
+}
+These can then be used to find the right storage size based on the monthly price as defined in the previous example.
+
+size = "${lookup(var.storage_sizes, var.plans["5USD"])}"
+
+variable "set_password" {
+    default = false
+}
+
+Example 3
+===============================
+# Use Case of for_each
+
+variable "account_name" {
+   type = "map"
+  default = {
+      "account1" = "devops1"
+      "account2" = "devops2"
+      "account3" = "devops3"
+}
+}
+resource "aws_iam_user" "iamuser" {
+  for_each = var.account_name
+  name = "${each.value}-iam"
+}
+===================================Terraform Conditions
+variable "env" {
+	default = "prod"
+}
+
+count = "${var.env == prod ? 1 : 0}"  -->Terraform Conditions
+================================
+https://dev.to/nehabharti/terraform-interview-questions-2020-23o3
+
+1.What is Terraform?
+
+Terraform is an open-source infrastructure as a code software tool created by HashiCorp. It is a tool for building, changing, 
+and versioning infrastructure safely and efficiently. Terraform can manage existing and popular service providers as well as 
+custom in-house solutions.
+
+2. How to Terraform work?
+
+Terraform produce an execution plan delineate, what it will do to reach the desired state, and then executes it to build the 
+described infrastructure. As the configuration changes, Terraform is able to determine what changed and create incremental 
+execution plans which can be applied.
+
+3. Explain the uses of Terraform CLI?
+
+Terraform is controlled via a very easy to use the command-line interface (CLI) it is only a single command-line 
+application: terraform. This application then takes a subcommand such as "apply" or "plan". The complete list of subcommands 
+is in the navigation to the left.
+
+4. what are the features of Terraform?
+Some features of Terraform are:-
+
+Graphing - Its features of graphing that are built-in are helpful in visualizing the infrastructure.
+Custom Syntax - Its custom syntax is very friendly which aids in enhancing efficiency.
+Resource Relationships - A very beneficial feature of terraforming is that it is able to understand resource relationships.
+Updates - The updates and features are added by the Open Source Project. It does so with a group of lots of contributors.
+Improved Maintenance - It is capable of breaking down the configuration into small parts or chunks for improving the organization and the maintenance.
+
+5. What are the components of Terraform?
+
+The two components are the Terraform Core and Terraform Plugins.
+
+The Terraform Core utilizes remote procedure calls (RPCs) for communicating with Terraform Plugins. In addition, 
+Terraform Core also offers diverse ways of discovering and loading plugins according to requirements.
+The Terraform Plugins represent an implementation for a specific service such as bash or AWS or provisioner.
+
+6. What are the reasons to choose Terraform for DevOps?
+
+To choose to Terraform for DevOps one important reason people consider Terraform is to manage their infrastructure as code. 
+Infrastructure as code is also a key and foundation for DevOps practices such as version control, code review, continuous 
+integration, and continuous deployment.
+
+7. Define Modules in Terraform.
+
+Modules in terraforming is a container for multiple resources that are used together. Every Terraform configuration has at 
+least one module, known as its root module, which consists of the resources defined in the .tf files in the main working directory.
+
+8. what is the Terraform cloud?
+
+Terraform Cloud is a SaaS that we support—that instead when you run Terraform you still could run it on your local machine, 
+but now it saves and retrieves the state file from Terraform Cloud—which is running over here. Terraform Cloud removes many 
+of the complexities in trying to maintain your own Terraform state files in a multi-team.
+
+9. How to check the installed version of Terraform?
+
+To check the version, launch Windows PowerShell and enter: terraform -version.
+
+10. Explain the Provisioners in Terraform.
+
+Provisioners are used to model specific actions on the local machine or on a remote machine in order to prepare servers or 
+other infrastructure objects for service.
+
+11. What is the difference between Terraform and CloudFormation?
+
+CloudFormation covers almost all bits and parts of AWS. Terraform covers the most important AWS resources as well. 
+But on top of that Terraform can provision infrastructure at other cloud providers as well as 3rd party services
+
+12. What is the null resource in Terraform?
+
+The null_resource resource implements the standard resource lifecycle but takes no further action. The triggers argument 
+allows specifying an arbitrary set of values that, when changed, will cause the resource to be replaced.
+
+13. How do you use count terraform?
+
+we just use [count. index] to dynamically specify the current iteration of the script!
+
+14. What is a terraform provider?
+
+Terraform is used to create, manage, and update infrastructure resources such as physical machines, VMs, network switches, 
+containers, and more. A provider is responsible for understanding API interactions and exposing resources.
+
+15. List Some notable applications of Terraform.
+
+Heroku App setup
+Self-service clusters
+Development of multi-tier applications
+Creation of disposable environments
+Multi-cloud deployment
+Resource schedulers
+Developing software demos
+
+16. Where is terraform D?
+
+Terraform. d/plugins on most operating systems and %APPDATA%\terraform. d\plugins on Windows. By default, terraform init 
+searches the following directories for plugins.
+============================
+Where can you find official modules to use with Terraform?
+On the Terraform module repository
+
+In the import command, what do the ADDR and ID fields represent?
+ADDR is the Terraform identifier; ID is the provider identifier.
+
+How is the source for a template defined?
+Either in-line or from a file
+
+What command must be run to configure the backend in Terraform?
+terraform init
+
+What environment variable lets Terraform know it’s running in an automation context?
+TF_IN_AUTOMATION
+
+What is the purpose of running the terraform init command?
+Init will download the required plugins and modules for the configuration.
+
+What does the import command do?
+Imports an existing, unmanaged resource into the Terraform configuration
+
+Which option tells Terraform to use a local directory for plugins?
+-plugin-dir=
+
+Why would you use the option ‘-input=false’ when running terraform init?
+It prevents Terraform from prompting the user for input.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

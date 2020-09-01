@@ -1,0 +1,23 @@
+miztiik_server-migration-onprem-to-aws_ Simple demonstration on how to Lift & Shift OnPremise workload to AWS 
+
+1)Prerequisites
+
+2)OnPremise VM (Preferably in VMWare / Virtualbox)
+If you have *.vmdk image of your VM that will also be enough
+MUST: You should have the uid/password to log into this VM
+
+3)AWS CLI with access to Administrator privileges
+
+4)Export VM & Upload to S3
+Depending on virtualization tool, use the appropriate procedure to export your VM into *.vmdk or *.ova image --> change to *.ovf
+Upload the image to S3 Bucket and note down the bucket_name and vm_image_name.
+
+5)Create Trust Policy
+
+6)Create the IAM Role for VM Import --vmimport
+
+7)Create the IAM Policy: role-policy.json
+
+8)Attach policy to IAM Role:vmimport
+
+9)Launch New EC2

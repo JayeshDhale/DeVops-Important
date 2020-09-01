@@ -1,0 +1,549 @@
+git architecture
+Working directory >> staging / Index area >> local repo  >> Remote repo
+=========================
+mkdir git-demo
+git init
+ll -al
+vi index.html
+git status
+git add index.html
+git status
+git commit -m "added file"
+(only for first time)
+git config --global user.name "jayesh"
+git config --global user.email jayeshd@gmail.com
+git log
+git log --oneline
+git ls-files (local repo)
+git ls (working directory)
+git show <commitid>
+git add * (working to local)
+(if file is already present, i.e you modify it)
+git commit -a -m "modified"
+
+================= day 2
+to see unstaged changes -- modify existing 
+git diff fiel1.txt
+now add file and run ,git diff fiel1.txt --this time git diff will show no values
+Now again modify , this time check git status  --file will be in both status staged and unstaged
+git diff fiel1.txt
+git diff --staged fiel1.txt
+
+----
+if you want git to ignore some files use
+create a file name .gitignore and put the file that you dont want to ignore
+-----------
+if you want to change top level commit message
+git log --oneline
+git commit --amend -m "added few changes"
+
+case 1:if you have added one more file and u dont want to change the last commit message u can use
+git commit --amend --> and then hit enter --> dont change the message
+if u want to cross verify use
+git log --stat  --->this will show us the files that has changed within the commit
+-------------
+if you want to remember some imp commit id use tag
+git tag --a V2.0 f2d1234<commitid> -m "added tags"
+git tag
+or
+git show V2.0
+------------
+if u want to revert any particular commit
+say in commit you have added one file
+git log --oneline
+git revert 12fg34<commitid>
+it will create new commit id
+git log --oneline
+ls
+git ls-files
+--------------
+to keep only particular commits
+git reset --hard 0981234
+after this commit it will be deleted everything,and head is pointing to this commit id, i.e in this case top most
+
+How to get back a commit to staging area?
+# git reset --soft <previous_commit id>
+
+Reset will work in working area, we can not reset if commit is pushed to Remote repo, suppose commit is pushed to Remote repo
+and later we do reset, it will reset working directory, and if we made any changes n try to push it to Remote, in this case conflicts will ocuure,
+so to revert any changes from Remote repo we use Revert.
+
+https://dev.to/neshaz/when-to-use-git-reset-git-revert--git-checkout-18je
+
+--soft : Tells Git to reset HEAD to another commit, so index and the working directory will not be altered in any way.
+All of the files changed between the original HEAD and the commit will be staged.
+
+--mixed: Just like the soft, this will reset HEAD to another commit. It will also reset the index to match it, while working directory 
+will not be touched. All the changes will stay in the working directory and appear as modified, but not staged.
+ 
+>The main difference between --mixed and --soft is whether or not your index is also modified.
+--hard: This resets everything - it resets HEAD back to another commit, resets the index to match it, and resets the working directory 
+to match it as well.
+
+git reset hard will delete only tracked files, untracked files remains,so remove these fiels run --> "git clean -df"
+
+working index HEAD target         working index HEAD
+----------------------------------------------------
+ A       B     C    D     --soft   A       B     D
+			  --mixed  A       D     D
+			  --hard   D       D     D
+			  --merge (disallowed)
+			  --keep  (disallowed)
+-------
+if u have modified two files (abcd.txt and xyz.html) and wanted to reset any one of them use
+git checkout abcd.txt
+
+git checkout . --> will discard all the changes of all the files in working area
+
+we have modified and added files to index area
+git reset HEAD * --> will unstage all changes
+
+git reset HEAD abcd.txt --> for particular file
+
+git reset HEAD~1  -->remove 1st commit
+Note:make sure that commit is not present in remote Repo
+
+we can not remove specific commit
+-------
+now we have couple of commits in system
+
+123456
+789654
+
+git reset HEAD~1  -->will point to 789654, remove files from staging and kept in Working directory as modified
+
+we cant remove (reset) any specific reset -- and we can not reset if commit is pushed to Remote repo
+
+default is Mixed
+======================
+scenario:- we have made git reset --hard  ,but later we come to know, we want that changes back
+git reflog --> will show all the log history
+git checkout <commitid>  --> commit id will be the recent to that last commit that we want to revert back (before the reset)
+git log  --> we can see our chnages are back
+git branch backup
+so on branch backup u will have ur changes back.
+
+==================
+Scenario:- if u want to undo some commit ,but other people have that changes
+git revert commitid
+
+git diff 456 123 --> will show diffrence between commits
+------------------
+Branching and merging
+-------------------
+git branch  --> will show on which branch u r
+-* master
+------
+To create new branch say b1 barnch
+git checkout -b b1 master
+or
+git branch b2
+
+to delete a branch, which is clean
+git branch -d b2
+
+to delete a branch, which has some files which is not commited, then u have to force delete in this case use "D"
+git branch -D b2
+------------
+to go to any specific branch say in this case master
+git checkout master
+---------------
+now we want to bring changes from branch b1 to master  -->we are on master branch
+git merge b1
+-----------------
+if there is a conflict ,say we have two files with same name in both branches, fix the conflict.
+it will show you head >> in this case its master,now you have fixed the conflict
+git commit -a -m "resolved conflicts"
+git status
+----------------
+if ur working on some files and you dont want to commit, without commiting, as these are incomplete
+in this case ur on working directory, and u dont want to lose changes u made to file,u can move changes to some temporary directory
+
+git stash
+git status
+and then commit
+
+to check stash list
+git stash list
+git show stash@{0}
+
+later on if u want ,you can get back those changes
+
+git stash pop stash@{0} --> your work will be back in working directory
+git status
+
+it will dropped the stash number
+git stash list
+no more stash
+
+there is another way to unstash
+git stash apply stash@{0}
+this time stash is not deleted, you can use it for another work or some other branch
+---------------------------
+if you want to stash new file i.e. untracked file use 
+git stash -u
+
+git stash clear --> to clear the stash list
+-------------------
+git rm filename --> will remove the file from local Repo as well as working directory
+git rm --cached filename --> will remove the file only from local Repo but not removed from working directory file system ,
+			     so if u want u can add it again
+
+# To remove an entire directory from the working index (cached):
+$ git rm -r --cached <directory name>
+
+# To delete an entire directory (force):
+$ git rm -r -f <directory name>
+========================
+git mv --> Move or rename a file, a directory, or a symlink
+
+Rename
+git mv [-v] [-f] [-n] [-k] <source> <destination>
+ex. git mv index6.txt index7.txt
+
+say we have dir1 and we want to copy file text1.txt from master to dir1
+git mv text1.txt dir1
+
+---------------------------------- git bisect
+git bisect reset -->is how you stop bisecting. 
+By default it will reset the HEAD to where it was before you started, 
+although you can also use git bisect reset <commit> to go to that one instead.
+If you just want to stop bisecting without changing the commit, from the documentation, git bisect reset HEAD would do what you want.
+
+--------------------- Rebase --> re write the log history
+master branch -> have two commits say A  and  B
+now created branch B1
+so changes will be flow to branch B1  i.e. A  and  B
+now you have added one more commit on master branch say C, 
+On B1 u have added new commit say D
+Now you need to have master changes on that too on B1
+so master > A B C
+B1 > A B D
+after rebase we will have A B C D
+u r on branch B1 so run 
+
+git rebase master
+
+if we use merge then we will have A B D C
+
+we can not have rebase on Master branch as we didnt create master branch or master branch is not a copy of any branch
+So we can have rebase for other branches,rebase is changing of base of the branch
+
+in this case top most commit id will get change-->only id change everything else will be there
+
+==================== git merge vs rebase --- 6 min
+Senarion u have 3 commits on master say m1 m2 m3 and on u made another branch at m2 say b1 branch,now on b1 u have created f1 and f2 commits
+when u merge on master it will be like m1 m2 m3 f1 and f2 and one more commit, but if u dont want f1 and f2 only changes should be merged ,use --squash
+git merge --squash b1
+git commit -m "feature and master merged"
+so out put will be m1 m2 m3 and "feature and master merged"
+
+================
+scenario :- u have accidently added file and commited on master branch
+u go to b1 branch ,run below command
+git cherry-pick 12345678<commit id>
+
+now go to master branch and run git reset <commit id>
+
+================
+git clean -df
+will clean untracked directory and files if any
+--------------------Remote repository ------
+create new account on Git Hub
+create one repository on git hub
+its a best practice to always push changes from master branch
+to push changes to git hub
+
+git remote add origin "https://github.com/devops-trainer/repo4.git"
+git push origin master
+it will ask username and password of git hub
+now go n check at git hub
+-------------
+Make sure that when u r clonning u should have empty directory--> and it will get git initialise automatically
+
+mkdir project
+
+now you want to pull changes from Git hub to PC or working directory
+
+git clone https://github.com/devops-trainer/repo4.git
+---------------------
+git pull origin --> will pull the upadtes / commits
+pull= fetch + merge
+
+git fetch origin --> will show there are changes ,but will not download changes on working directory
+
+Note:make sure that when ever ur pushing ur changes to Remote repo, u should have latest copy of that
+other wise u will get some conflicts
+=============================== look for 
+To see which branches are already merged into the branch you’re on, you can run 
+git branch --merged
+
+To see all the branches that contain work you haven’t yet merged in, you can run
+git branch --no-merged
+========================
+Git workflow
+
+install git-flow
+cd Repositories
+cd git-work-flow
+git flow init -d
+
+master --> production
+develop --> branch for next release 
+feature -->
+release branch -->
+hot fix branch  -->
+support branch -->
+
+git flow feature start a-new-feature
+o/p:- feature/a-new-feature
+
+before pushing code to git hub
+generate ssh key
+ssh-keygen -t rsa -C "jayeshd@gmail.com"
+
+-- .ssh ls  --> look for id_rsa.pub it will have public key and id_rsa will have private key
+now go to git hub "SSH Keys" and put that key
+
+now go to repository location and do 
+git remote add origin git@github.com:hajjhsdhj/git-workflow
+
+check by using
+git remote -v
+
+we normally select develop branch as default branch on git hub
+
+some commands of git workflow
+git flow feature
+git flow feature publish a-new-feature  -- pushing feature branch in git hub
+
+
+===========================*****
+
+How to find a list of files that changed during a commit?
+git diff-tree -r {hash}
+git diff-tree --no-commit-id --name-only -r {hash}
+
+Git Aliases
+$ git config --global alias.co checkout
+$ git config --global alias.br branch
+$ git config --global alias.ci commit
+$ git config --global alias.st status
+
+git config --list
+gedit / vi .gitconfig
+
+Git Working directory messages
+->changes not staged for commit
+->untracked files
+->nothing to commit, working directory is clean
+
+git log --author="jayesh"
+git log --before="20may2020"
+****************************** Day 3 **********************
+Build tool for java is --maven and for .net -NANT,Microsoft build
+
+Most popular integration tool is Jenkins, we also have Traves and bamboo
+
+Why jenkins?
+Open source, Good plugin Support,good community support,fast and reliable ,good os support, scripted builds
+
+POM file-project Object Model
+PMD-Program mistake detector
+Code Review;-  -P metrics pmd:pmd  (Search for pmd maven plugin)
+install pmd plugin to view xml generated file
+go to post build of job > select Publish PMD analysis results > specify path "target/pmd.xml"
+for testing :- junit > publish junit test result
+QA Metric Check > goals > cobertura:cobertura -Dcobertura.report.format=xml
+to generate trend reports install plugin named "cobertura" 
+=================================== Day 4 --1.24
+Continuous Deployment-configuration Management with Puppet
+IaC -- infra strucutre as a code
+Resource abstraction -- Puppet DSL
+
+Puppet master -- Puppet Agent
+communication happend by SSL via port no 8140
+1) Agent will first send facts (CPU architecture ip address) to master
+2) master will identify the facts
+3) then master will create or complie a catalog (documnet with all info of config to be done) by puppet code
+4) catalog will be sent to agent
+5) agnet will appply the catalog
+
+Puppet Architechture
+Puppet Agent --->
+	     <----Puppet Server --->
+					Fetch the node object
+						|
+					Set Variables
+						|
+					Assess the main Manifest
+						|
+					Load classes from modules
+						|
+					Assess Classes from node object
+
+
+vi /etc/puppetlabs/puppet/puppet.conf  -- config setting 2.14
+
+puppet manifest file .pp extenstion means puppet program
+
+by default every 30 min it will poll, but if you want u can run below command
+puppet agent --test     #on node (agent)
+
+====================== Day 5
+to Aviod same repetative code in Puppet DSL we can have classes
+
+class linux{
+ file{'/info.txt':
+  ensure => 'present',
+  content => "created by puppet",
+  }
+package{'httpd':
+  ensure => 'present',
+  }
+service{'httpd':
+  ensure => 'running',
+  enable => true,
+  }
+}
+----------- in node defination
+
+node 'centos-node1'{
+ class {'linux':}
+}
+node 'ubuntu-node2'{
+ class {'linux':}
+}			
+------------
+to check any syntax error
+puppet parser validate site.pp
+
+---------------- resource declaration
+class linux{
+ $admintools=['git','nano','screen']		#$ for array declaration
+  package{$admintools:
+  ensure => 'present',
+  }
+ file{'/info.txt':
+  ensure => 'present',
+  content => "created by puppet",
+  }
+package{'httpd':
+  ensure => 'present',
+  }
+service{'httpd':
+  ensure => 'running',
+  enable => true,
+  }
+}
+
+------------------------------------environment is present from puppet version 4
+on puppet master
+cd /etc/puppetlabs/code/environment/production
+cd /etc/puppetlabs/code/environment/testing
+
+mydirk manifests
+vi site.pp
+
+and make entry in that file
+node 'centos-node1'{
+ file{'/info.txt':
+  ensure => 'present',
+  content => "created by puppet on testing env",
+}
+
+now go to puppet agent
+vi /etc/puppetlabs/puppet/pupet.conf
+server=puppetmaster
+environment=testing
+
+so it will pull changes from now testing environment
+
+--------------------------------
+if u want to change run interval-- it will be done in puppet agent
+now go to puppet agent
+vi /etc/puppetlabs/puppet/pupet.conf
+runinterval=1m
+server=puppetmaster
+environment=testing
+
+---------------------------modules
+cd /etc/puppetlabs/code/environment/production/modules
+generate mediaviki module
+puppet module generate mediawiki --environment production
+
+here we have created class under mediawiki location under manifest file, by default if u run agent it will go to default path
+cd /etc/puppetlabs/code/environment/production/manifest
+so append or modify manifest file
+
+node 'centos-node1'{
+ class {'linux':}
+ class {'mediawiki':}
+}
+node 'ubuntu-node2'{
+ class {'linux':}
+ class {'mediawiki':}
+}
+class linux{
+ $admintools=['git','nano','screen']		#$ for array declaration
+  package{$admintools:
+  ensure => 'present',
+  }
+ file{'/info.txt':
+  ensure => 'present',
+  content => "created by puppet",
+  }
+}
+
+------------------
+:: -- tp level scope / search for outside the module
+
+============================================= Ansible 2.17
+to add user on hosts from master
+
+first make changes in hosts  vi /etc/sudoers set no password
+systemctl restart sshd
+
+then on master run below command
+ansible webservers -m user -a "name=john password=john" -s
+
+cross verify on host
+id john
+=================================== day 6
+setup module in Ansible, it will show details of host (group) just like facts in Puppet
+ansible webservers -m setup
+
+ansible webservers -m setup -a "filter=ansible_user*"		#use some filter, will show you only those details
+
+to check no hosts to be targeted
+ansible-playbook palybook.yml --list-hosts
+
+to check syntax
+ansible-playbook palybook.yml --syntax-check
+
+we can write script file with extention .sh  # say file is present at tmp location
+run by #sh /tmp/test.sh
+
+To check any software or package isnatlled or not use
+rpm -qa git
+
+sudo yum install wget
+
+to check some default values, you can also change it as per ur need
+cat ansible.cfg
+
+============================ Day 7
+
+
+
+
+
+
+
+
+
+
+
+
+
+

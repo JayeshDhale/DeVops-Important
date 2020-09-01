@@ -1,0 +1,173 @@
+============================================= Ansible 2.17
+to add user on hosts from master
+
+first make changes in hosts  vi /etc/sudoers set no password
+systemctl restart sshd
+
+then on master run below command
+ansible webservers -m user -a "name=john password=john" -s
+
+cross verify on host
+id john
+=================================== day 6
+setup module in Ansible, it will show details of host (group) just like facts in Puppet
+ansible webservers -m setup
+
+ansible webservers -m setup -a "filter=ansible_user*"	#use some filter, will show you only those details
+
+to check number of hosts to be targeted
+ansible-playbook palybook.yml --list-hosts
+
+to check syntax
+ansible-playbook palybook.yml --syntax-check
+
+we can write script file with extention .sh  		#say file is present at tmp location
+run by #sh /tmp/test.sh
+
+To check any software or package isnatlled or not use
+rpm -qa git
+
+sudo yum install wget
+
+to check some default values, you can also change it as per ur need
+cat ansible.cfg
+================================
+cd /etc/ansible/hosts
+-------------------------------------
+host file examples
+client.learnitguide.net
+-------------------------------------
+[oracle-servers]
+oracle-a.learnitguide.net
+oracle-b.learnitguide.net
+oracle-c.learnitguide.net
+or
+oracle-[a-c].learnitguide.net
+
+[web-servers]
+web1.learnitguide.net
+web2.learnitguide.net
+web3.learnitguide.net
+or
+web[1-3].learnitguide.net
+-------------------------------------
+if you want to run with different users or override default user
+client.learnitguide.net ansible_user=john
+
+ansible all -m ping --- ping module
+ansible web-servers -m ping
+ansible web-servers -m shell -a "uptime"  ---- shell module
+
+say we have created another hosts file at diffrent location /root/hostfile i.e. overriding default path
+ansible -i /root/hostfile web-servers -m shell -a "uptime"
+
+ansible all -a "uname -a" -- used option rather than module
+ansible all -a uptime -- used module
+
+ansible-doc -l | more   ----- to list all of the modules present
+ansible-doc -l |more |wc -l  ---- to list number of modules
+ansible-doc user --- will show you details of that particular module
+
+ansible all -i inventory -m user -a "name=john state=present"    --- to check user is there or not and if not it will add
+ansible all -i inventory -m user -a "name=john password=redhat"
+to cross verify user us created on client machine use --> id john
+
+to delete user from client machine use --> userdel -r john
+
+ansible all -a "yum install httpd -y"  ---here we just passing the command on client machine by using -a argument
+to cross verify package has been installed on client machine use --> rpm -q httpd
+
+ansible all -m yum -a "name=httpd state=present"  ---> yum module
+====================================
+ansible configuration file
+rpm -ql ansible |more   ---> to check the number of files present in system
+/etc/ansible ---> default file location
+/etc/ansible/ansible.cfg
+/etc/ansible/roles
+
+#some basic dafault values
+
+#inventory = /etc/ansible/hosts
+#library = /usr/share/my_modules/
+#forks = 5
+#poll_interval =15
+
+having multiple config file is suitable to handle complex requirements, nearly all parameters can be overridden in 
+ansible-playbooks or with command line flags
+ANSIBLE_CONFIG -> ansible.cfg in current working directory
+-> home directory or /etc/ansible/ansible.cfg
+========================================
+Ansible Roles & galaxy
+
+ansible-galaxy init /etc/ansible/roles/apache --offline ---> this will create clean directory structure here role is apache
+tree /etc/ansible/roles/apache/    ---> to list out the directory structure
+we have 
+-- README.md
+-- defaults		---defaults variables for the roles to be used for this specific deployments
+  -- main.yml
+-- files		--files required to transfer or deploy to target machine via these roles
+-- handlers		--which can be used by these roles or anywhere outside these roles
+  -- main.yml 
+-- meta			--info about this roles something like dependancy ,version ,supported platforms etc..
+  -- main.yml 
+-- tasks		--main list of task to be executed by this roles, deploy to client machine
+  -- main.yml 
+-- templates		-- dynamic files 
+-- tests		--test directory
+  -- inventory
+  -- test.yml
+-- vars		  --other variables for this roles, this has higest precedance than defaults, both used for declaring variables
+  -- main.yml 
+
+ex. /etc/ansible/roles/apache 
+- import_tasks: install.yml
+- import_tasks: configure.yml
+- import_tasks: service.yml
+
+to execute go to /etc/ansible create a file say "vi runsetup.yml" and define roles that has to be exeuted ex.
+
+---
+ - hosts: webserver
+   roles:
+   - apache
+   - nfs
+   - ftp
+
+ansible-playbook runsetup.yml --syntax-check     -----> to check the syntax errors
+to verify on client machine use --> rpmquery httpd
+access the web page from client use --> elink http://webserver(node2)
+=================================
+Ansible Vault to Protect Ansible Playbooks with Encryption
+Ansible Vault is a feature of ansible to encrypt/decrypt utility for ansible data files
+Say u have created a plybook now anyone can view by using cat users.yml now encrypt it
+
+>>ansible-vault encrypt users.yml
+it will ask you valut password: > confirm password > will show encryption completed
+now if you view by cat users.yml > data will be in encrypted form
+
+to view encrypted file
+ansible-vault view users.yml
+Valult Password:  (enter password here)
+
+to edit encrypted file
+ansible-vault edit users.yml
+Valult Password:  (enter password here)
+note:-once file encrypted with vault you can not run file as it is like,ansible-playbook users.yml
+
+you have to call argument to provide password or u have to provide file where u have mentioned vault password
+ansible-playbook users.yml --ask-vault-pass
+Vault password: (enter password here)
+
+or created a file say vault-password
+ansible-playbook users.yml --vault-password-file /root/ansible/vault-password
+-------------------------------
+how to change vault password
+ansible-vault rekey users.yml
+Valult Password:  (enter old password here)
+New Valult Password:  (enter new password here)
+confirm new password > Rekey successful
+
+if you want to decrypt the file 
+ansible-vault decrypt users.yml
+Valult Password:  (enter password here)
+now you can use any editors to view the the file

@@ -1,0 +1,99 @@
+1)EBS-Elastic Block store --Used to attach for EC2 instances --volumes exist on EBS i.e. virtual hard disk
+Volume Type:- 
+General purpose ssd (gp2) Most work loads , Max IOPS/Volume is 16000 -- This is default for EC2 instance
+Provisioned IOPS SSD (io1) Databases , Max IOPS/Volume is 64000
+Throughput Optimized HDD (st1) Big Data & Data Warehouses, Max IOPS/Volume is 500
+Cold HDD (sc1) File Servers, Max IOPS/Volume is 250
+EBS Magnetic (Standard) Workloads where data is infrequently accessed ,Max IOPS/Volume is 40-200
+
+2)If you want to move EC2 instance from one availability zone to other AZ?
+Find your root device volume (EBS), Take sanpshot of it, Go to snapshot and create image out it and deploy it into other AZ.
+Or You can copy the existing AMI from current region to diffrent Region.
+
+3)When you create image from EBS Snapshot ,we have two types of Virtualization i.e. Para virtual or hardware virtual machine(PV or HPM)
+default is Hardware-assistance Virtualization(HVM)
+
+4)When you delete the EC2 instances, by default,default EBS volume is terminated however additional volumes attached to it will continue to persist
+
+5)You can have 1 EBS for EC2 instance, but in EFS you can have more than 1 EC2 instances attached to it.
+
+6)EC2 Placement Groups
+A> Clustered Placement Group
+--> Low network latency / High network throughput
+-->Cant span multiple AZ
+B>Spread palcement Group
+-->Individual Critical EC2 instances
+-->Can span multiple AZ, but in same region
+C>Partitioned
+-->Multiple EC2 Instances HDFS,HBase and Cassandra
+-->Can span multiple AZ, but in same region
+
+Only certian types of instances can be launched in palcement group
+Compute Optimized,GPU,Memory Optimized,Storage Optimized
+
+7)Instance store volumes are sometimes called Ephemeral Storage.It can not be stopped,
+we can olny restart or terminate, if underlying host fails you will lose your data.
+
+8)AWS CLI -->SSH to ur EC@ instance and run "aws configure" command u will get aws directory, in that configure u have to provide Access Key ID and Security Access Key.
+to view files u have to run "cd .aws" as its hidden.Better secure this using Roles.Roles are universal.
+
+9)Instance meta data -- curl http://169.254.169.254/latest/meta-data/
+ User meta data -- curl http://169.254.169.254/latest/user-data/  -- will get boot strap script, which is used to launch EC2 instance.
+
+10)When you create a custom VPC, which of the following are created automatically?
+Custom VPC (Default it will create)--> Route Table -->NACL -->Security Groups
+
+create 1 subnet for public and 1 subnet for private (DB)
+IGW and attached to VPC, we only have 1 IGW per VPC
+create a route table , 1 for public and 1 for private
+for public-->assign IGW and Subnet(Public)
+
+Notes:-
+A)We have 5 IP address as reserved
+251 availabe IP Address  >  
+1 for network address
+1 for network broadcast
+1 Reserved by AWS for the VPC router
+1 Reserved by AWS for for the DNS
+1 Reserved by AWS for future use
+
+B)Security groups do not span VPC
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

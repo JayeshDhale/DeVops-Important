@@ -1,0 +1,40 @@
+kube-apiserver:-
+Kube-apiserver is the front-end of the maser node control panel that exposes all the component APIs. 
+It establishes communication between Kubernetes nodes and master components. 
+
+kube-scheduler:-
+The kube-scheduler manages the workload of the worker nodes. It keeps track of resource utilization to ensure that 
+the scheduling is done on suitable nodes.
+
+Briefly explain the role of the Kubernetes Controller Manager.
+In Kubernetes, various processes are running on the master node, and they are compiled together in the form of the 
+Kubernetes Controller Manager. It is a daemon that embeds controllers, including the following:
+-> Node Controller: Manages the status, i.e., creating, updating and deleting nodes 
+-> Replication Controller: Maintains pods for every replication object
+-> Service account and token controller: Concerned with the default accounts and API access tokens for new namespaces
+-> Endpoint controller: Looks after the endpoint objects (pods and services)
+
+17. What is Heapster?
+Heapster is a performance monitoring and metrics collection tool supported natively on the Kubernetes cluster. It runs like any other pod in the cluster, discovering all nodes and querying information from Kubernetes nodes. This container management tool works via an on-machine agent. 
+
+18. What is ETCD in Kubernetes?
+Etcd is a store for the configuration, state, and metadata of Kubernetes clusters. It is written in Go programming language and represents the cluster state at a given point in time. This datastore serves as the backbone of distributed systems. 
+
+19. What do you understand by container resource monitoring?
+From the user perspective, it is vital to understand resource utilization at different abstraction layers and levels, like container pods, services, and the entire cluster. Each level can be monitored using various tools, namely:
+•	Grafana
+•	Heapster
+•	InfluxDB
+•	CAdvisor
+•	Prometheus
+
+20.	How can you ensure the security of your environment while using Kubernetes?
+You can follow and implement the following security measures while using Kubernetes:
+•	Restrict ETCD access
+•	Limit direct access to nodes
+•	Define resource quota
+•	Everything should be logged on the production environment
+•	Use images from the authorized repository
+•	Create strict rules and policies for resources
+•	Conduct continuous security and vulnerability scanning
+•	Apply security updates regularly
